@@ -118,7 +118,7 @@ describe('ac', () => {
       simulator.ac('グレートストライド') // 適当に経過
       expect(simulator.muscleMemory).toBe(4)
       simulator.ac('下地作業')
-      expect(simulator.getProgress()).toBe(675 + 675 * 2)
+      expect(simulator.getProgress()).toBe(675 + 810 * 2)
       expect(simulator.getDurability()).toBe(30)
       expect(simulator.muscleMemory).toBe(0) // バフが消えること
     })
@@ -132,7 +132,7 @@ describe('ac', () => {
       simulator.ac('ヴェネレーション')
       expect(simulator.muscleMemory).toBe(4)
       simulator.ac('下地作業')
-      expect(simulator.getProgress()).toBe(675 + Math.floor(675 * 2.5))
+      expect(simulator.getProgress()).toBe(675 + Math.floor(810 * 2.5))
       expect(simulator.getDurability()).toBe(30)
       expect(simulator.muscleMemory).toBe(0) // バフが消えること
     })
@@ -149,6 +149,47 @@ describe('ac', () => {
       expect(simulator.innovation).toBe(4)
       simulator.ac('加工')
       expect(simulator.getQuality()).toBe(260 + 260 * 1.1 + 260 * 1.5 * 1.2)
+    })
+  })
+
+  describe('グレートストライド', () => {
+    test('バフ', () => {
+      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      simulator.ac('グレートストライド')
+      expect(simulator.greatStrides).toBe(3)
+      simulator.ac('加工')
+      expect(simulator.getQuality()).toBe(260 * 2)
+      simulator.ac('グレートストライド')
+      simulator.ac('加工')
+      expect(simulator.getQuality()).toBe(260 * 2 + 260 * 2 * 1.1)
+    })
+  })
+
+  describe('ビエルゴの祝福', () => {
+    test('単体', () => {
+      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      simulator.ac('ビエルゴの祝福')
+      expect(simulator.getQuality()).toBe(260)
+    })
+
+    test('インナークワイエット', () => {
+      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      simulator.ac('加工')
+      expect(simulator.inner).toBe(1)
+      simulator.ac('ビエルゴの祝福')
+      expect(simulator.getQuality()).toBe(260 + Math.floor(312 * 1.1))
+      expect(simulator.inner).toBe(0)
+    })
+  })
+
+  describe('倹約', () => {
+    test('耐久値', () => {
+      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      simulator.ac('倹約')
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(55)
+      simulator.ac('下地加工')
+      expect(simulator.getDurability()).toBe(45)
     })
   })
 })

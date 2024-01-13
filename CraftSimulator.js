@@ -18,7 +18,7 @@ const ACTIONS = {
     cp: 7,
   },
   '下地作業': {
-    progressEfficiency: 300,
+    progressEfficiency: 360,
     qualityEfficiency: 0,
     durability: 20,
     cp: 18,
@@ -36,7 +36,7 @@ const ACTIONS = {
     cp: 6,
     inner: 1,
   },
-  '倹約作業': {
+  '倹約作業': { // TODO: 倹約、長期倹約中に実行を禁止する
     progressEfficiency: 180,
     qualityEfficiency: 0,
     durability: 5,
@@ -63,7 +63,7 @@ const ACTIONS = {
     cp: 18, // 中級加工からのコンボ前提
     inner: 1,
   },
-  '倹約加工': {
+  '倹約加工': { // TODO: 倹約、長期倹約中に実行を禁止する
     progressEfficiency: 0,
     qualityEfficiency: 100,
     durability: 5,
@@ -83,6 +83,12 @@ const ACTIONS = {
     durability: 20,
     cp: 40,
     inner: 2,
+  },
+  'ビエルゴの祝福': {
+    progressEfficiency: 0,
+    qualityEfficiency: 100,
+    durability: 10,
+    cp: 24,
   },
   'マニピュレーション': {
     progressEfficiency: 0,
@@ -107,6 +113,18 @@ const ACTIONS = {
     qualityEfficiency: 0,
     durability: 0,
     cp: 18,
+  },
+  '倹約': {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 56,
+  },
+  '長期倹約': {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 98,
   },
 }
 
@@ -137,16 +155,20 @@ const QUALITY_VALUE_MAP = {
   '4056': {
     '0': 0,
     '100': 260,
+    '120': 312, // 算出
     '125': 325,
     '150': 390,
     '200': 520,
+    '300': 780,
   },
   '4076': {
     '0': 0,
     '100': 261,
+    '120': 313, // 算出
     '125': 326,
     '150': 391,
     '200': 522,
+    '300': 783,
   },
 }
 
@@ -171,6 +193,8 @@ export default class CraftSimulator {
     this.muscleMemory = 0 // 確信
     this.veneration = 0
     this.innovation = 0
+    this.greatStrides = 0
+    this.wasteNot = 0 // 倹約
 
     // この時点でランダムに状態を100ターン分くらい決めておく
   }
@@ -192,8 +216,16 @@ export default class CraftSimulator {
 
     // 加工や作業
     this.progress += this._getProgressValue(a.progressEfficiency)
-    this.quality += this._getQualityValue(a.qualityEfficiency)
-    this.durability -= a.durability
+    let qe = a.qualityEfficiency
+    if (action === 'ビエルゴの祝福') {
+      qe += this.inner * 20
+    }
+    this.quality += this._getQualityValue(qe)
+    let du = a.durability
+    if (this.wasteNot > 0) {
+      du = Math.floor(du / 2)
+    }
+    this.durability -= du
     if (a.inner) {
       this.inner += a.inner
       if (this.inner > 10) {
@@ -219,19 +251,31 @@ export default class CraftSimulator {
     if (this.innovation > 0) {
       this.innovation -= 1
     }
+    if (this.greatStrides > 0) {
+      this.greatStrides -= 1
+    }
+    if (this.wasteNot > 0) {
+      this.wasteNot -= 1
+    }
+    if (action === 'ビエルゴの祝福') {
+      this.inner = 0
+    }
 
     // バフ追加
     if (action === 'マニピュレーション') {
       this.manipulation = 8
-    }
-    if (action === '確信') {
+    } else if (action === '確信') {
       this.muscleMemory = 5
-    }
-    if (action === 'ヴェネレーション') {
+    } else if (action === 'ヴェネレーション') {
       this.veneration = 4
-    }
-    if (action === 'イノベーション') {
+    } else if (action === 'イノベーション') {
       this.innovation = 4
+    } else if (action === 'グレートストライド') {
+      this.greatStrides = 3
+    } else if (action === '倹約') {
+      this.wasteNot = 4
+    } else if (action === '長期倹約') {
+      this.this.wasteNot = 8
     }
 
     return {
@@ -273,6 +317,11 @@ export default class CraftSimulator {
     }
 
     let ratio = 1
+    // グレートストライド
+    if (this.greatStrides > 0 && qualityEfficiency > 0) {
+      ratio += 1
+      this.greatStrides = 0
+    }
     // イノベーション
     if (this.innovation > 0) {
       ratio += 0.5
