@@ -84,6 +84,30 @@ const ACTIONS = {
     cp: 40,
     inner: 2,
   },
+  'マニピュレーション': {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 96,
+  },
+  'ヴェネレーション': {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 18,
+  },
+  'グレートストライド': {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 32,
+  },
+  'イノベーション': {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 18,
+  },
 }
 
 // TODO: ステータスから計算して算出したい
@@ -142,6 +166,12 @@ export default class CraftSimulator {
     // インナークワイエット
     this.inner = 0
 
+    // バフ類
+    this.manipulation = 0
+    this.muscleMemory = 0 // 確信
+    this.veneration = 0
+    this.innovation = 0
+
     // この時点でランダムに状態を100ターン分くらい決めておく
   }
 
@@ -150,6 +180,17 @@ export default class CraftSimulator {
     if (!a) {
       throw new Error(`${action} is not defined in ACTIONS.`)
     }
+
+    const doAction = this.cp >= a.cp
+
+    if (!doAction) {
+      return {
+        finish: this.hasMaxProgress() || this.durability <= 0,
+        complete: this.hasMaxProgress(),
+      }
+    }
+
+    // 加工や作業
     this.progress += this._getProgressValue(a.progressEfficiency)
     this.quality += this._getQualityValue(a.qualityEfficiency)
     this.durability -= a.durability
@@ -160,6 +201,39 @@ export default class CraftSimulator {
       }
     }
     this.cp -= a.cp
+
+    // ターン経過処理
+    if (this.manipulation > 0) {
+      this.manipulation -= 1
+      this.durability += 5
+      if (this.durability > this.getMaxDurability()) {
+        this.durability = this.getMaxDurability()
+      }
+    }
+    if (this.muscleMemory > 0) {
+      this.muscleMemory -= 1
+    }
+    if (this.veneration > 0) {
+      this.veneration -= 1
+    }
+    if (this.innovation > 0) {
+      this.innovation -= 1
+    }
+
+    // バフ追加
+    if (action === 'マニピュレーション') {
+      this.manipulation = 8
+    }
+    if (action === '確信') {
+      this.muscleMemory = 5
+    }
+    if (action === 'ヴェネレーション') {
+      this.veneration = 4
+    }
+    if (action === 'イノベーション') {
+      this.innovation = 4
+    }
+
     return {
       finish: this.hasMaxProgress() || this.durability <= 0,
       complete: this.hasMaxProgress(),
@@ -176,7 +250,16 @@ export default class CraftSimulator {
     if (value === undefined) {
       throw new Error(`Invalid progressEfficiency: ${progressEfficiency}`)
     }
-    return value
+    let ratio = 1
+    // 確信バフ
+    if (this.muscleMemory > 0 && progressEfficiency > 0) {
+      ratio += 1
+      this.muscleMemory = 0
+    }
+    if (this.veneration > 0) {
+      ratio += 0.5
+    }
+    return Math.floor(value * ratio)
   }
 
   _getQualityValue(qualityEfficiency) {
@@ -188,8 +271,14 @@ export default class CraftSimulator {
     if (value === undefined) {
       throw new Error(`Invalid qualityEfficiency: ${qualityEfficiency}`)
     }
-    // インナークワイエット反映
-    return Math.floor(value + value / 10 * this.inner)
+
+    let ratio = 1
+    // イノベーション
+    if (this.innovation > 0) {
+      ratio += 0.5
+    }
+    // インナークワイエットは乗算
+    return Math.floor(value * ratio * (1 + 0.1 * this.inner))
   }
 
   // https://github.com/daemitus/SomethingNeedDoing/blob/master/SomethingNeedDoing/Misc/ICommandInterface.cs
