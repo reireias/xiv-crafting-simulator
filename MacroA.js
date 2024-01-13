@@ -1,5 +1,7 @@
 import MacroBase from './MacroBase.js'
 export default class MacroA extends MacroBase {
+
+  // 状態なしではギリ完成しないマクロ
   run(simulator) {
     this.simulator = simulator
     this.result = {
@@ -31,6 +33,7 @@ export default class MacroA extends MacroBase {
     if (this.check(simulator.ac('ヴェネレーション'))) return this.result
     if (this.check(simulator.ac('倹約作業'))) return this.result
     if (this.check(simulator.ac('模範作業'))) return this.result
+    // あと1手必要だが通常状態だとCPも耐久もない
 
     console.log('ここにはこないはず')
     return this.result

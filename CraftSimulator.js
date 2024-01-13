@@ -172,6 +172,17 @@ const QUALITY_VALUE_MAP = {
   },
 }
 
+// TODO: 5段階と6段階で指定できるように
+// これは5段階目
+const CONDITIONS = [
+  'normal', // 通常
+  'good', // 高品質
+  'pliant', // 高能率
+  'centered', // 安定
+  'sturdy', // 頑丈
+  'good omen', // 良兆候 TODO: 実機でチェック
+]
+
 export default class CraftSimulator {
   constructor(recipe, status) {
     this.recipe = recipe
@@ -197,6 +208,16 @@ export default class CraftSimulator {
     this.wasteNot = 0 // 倹約
 
     // この時点でランダムに状態を100ターン分くらい決めておく
+    this.conditions = ['normal']
+    while (this.conditions.length < 100) {
+      const next = CONDITIONS[Math.floor(Math.random() * CONDITIONS.length)]
+      this.conditions.push(next)
+      // 良兆候の次は高品質
+      if (next === 'good omen') {
+        this.conditions.push('good')
+      }
+    }
+    this.turnIndex = 0
   }
 
   ac(action) {
@@ -260,6 +281,7 @@ export default class CraftSimulator {
     if (action === 'ビエルゴの祝福') {
       this.inner = 0
     }
+    this.turnIndex += 1
 
     // バフ追加
     if (action === 'マニピュレーション') {
