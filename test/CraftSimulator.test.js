@@ -197,6 +197,62 @@ describe('ac', () => {
       expect(simulator.getDurability()).toBe(45)
     })
   })
+
+  describe('匠の神業', () => {
+    test('耐久値減少なし', () => {
+      const simulator = createSimulator()
+      simulator.inner = 10
+      simulator.ac('匠の神業')
+      expect(simulator.getDurability()).toBe(60)
+      expect(simulator.getQuality()).toBe(520)
+    })
+
+    test('インナークワイエット10限定', () => {
+      const simulator = createSimulator()
+      simulator.ac('匠の神業')
+      expect(simulator.getDurability()).toBe(60)
+      expect(simulator.getQuality()).toBe(0)
+    })
+  })
+
+  describe('秘訣', () => {
+    test('回復', () => {
+      const conditions = ['normal', 'good']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('マニピュレーション')
+      expect(simulator.getCp()).toBe(672 - 96)
+      simulator.ac('秘訣')
+      expect(simulator.getCp()).toBe(672 - 96 + 20)
+    })
+
+    test('最大値を超えない', () => {
+      const conditions = ['good']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('秘訣')
+      expect(simulator.getCp()).toBe(672)
+    })
+
+    test('高品質時限定', () => {
+      const conditions = ['normal', 'normal']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('マニピュレーション')
+      expect(simulator.getCp()).toBe(672 - 96)
+      simulator.ac('秘訣')
+      expect(simulator.getCp()).toBe(672 - 96)
+    })
+  })
 })
 
 describe('condition', () => {

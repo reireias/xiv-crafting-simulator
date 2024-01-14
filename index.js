@@ -1,5 +1,6 @@
 import SimulationManager from './SimulationManager.js'
 import MacroA from './MacroA.js'
+import MacroB from './MacroB.js'
 
 // モーエンツール5段階
 const SPLENDOROUS_5_RECIPE = {
@@ -23,8 +24,12 @@ const MEISTER_STATUS = {
   cp: 687,
 }
 
-console.log('inidex')
 const manager = new SimulationManager()
-const macro = new MacroA()
+const macroA = new MacroA()
+const macroB = new MacroB()
 
-manager.simulate(SPLENDOROUS_5_RECIPE, NOT_MEISTER_STATUS, macro, 1)
+// 750~ : 1
+// 1125~: 2
+// 1500~: 3
+manager.simulate(SPLENDOROUS_5_RECIPE, NOT_MEISTER_STATUS, macroA, 50000)
+manager.simulate(SPLENDOROUS_5_RECIPE, NOT_MEISTER_STATUS, macroB, 50000)

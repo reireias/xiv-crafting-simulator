@@ -11,9 +11,10 @@ const DUMMY_STATUS = {
   control: 4056,
   cp: 672,
 }
+const CONDITIONS = new Array(100).fill('normal')
 
 test('run', () => {
-  const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+  const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS, CONDITIONS)
   const macro = new MacroA()
   const result = macro.run(simulator)
   expect(result.complete).toBeFalsy()

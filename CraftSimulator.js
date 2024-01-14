@@ -92,6 +92,12 @@ const ACTIONS = {
     durability: 10,
     cp: 24,
   },
+  匠の神業: {
+    progressEfficiency: 0,
+    qualityEfficiency: 100,
+    durability: 0,
+    cp: 32,
+  },
   マニピュレーション: {
     progressEfficiency: 0,
     qualityEfficiency: 0,
@@ -127,6 +133,12 @@ const ACTIONS = {
     qualityEfficiency: 0,
     durability: 0,
     cp: 98,
+  },
+  秘訣: {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 0,
   },
 }
 
@@ -218,7 +230,19 @@ export default class CraftSimulator {
       // この時点でランダムに状態を100ターン分くらい決めておく
       this.conditions = ['normal']
       while (this.conditions.length < 100) {
-        const next = CONDITIONS[Math.floor(Math.random() * CONDITIONS.length)]
+        // 通常が50%, 高品質5%, 良兆候5%, 安定・頑丈・高能率残り
+        // 参考: https://jp.finalfantasyxiv.com/lodestone/character/5483630/blog/4382417/
+        let next
+        const r = Math.random()
+        if (r < 0.5) {
+          next = 'normal'
+        } else if (r >= 0.95) {
+          next = 'good'
+        } else if (r >= 0.90) {
+          next = 'good omen'
+        } else {
+          next = CONDITIONS[Math.floor(Math.random() * 3) + 2]
+        }
         // 高品質は連続しない
         if (
           next === 'good' &&
@@ -243,11 +267,15 @@ export default class CraftSimulator {
     }
 
     let doAction = this.cp >= a.cp
-    // 集中作業・集中加工は高品質時のみ利用可能
+    // 集中作業・集中加工・秘訣は高品質時のみ利用可能
     if (
-      ['集中作業', '集中加工'].includes(action) &&
+      ['集中作業', '集中加工', '秘訣'].includes(action) &&
       !this.hasCondition('good')
     ) {
+      doAction = false
+    }
+    // 匠の神業はインナークワイエット10でのみ利用可能
+    if (action === '匠の神業' && this.inner < 10) {
       doAction = false
     }
 
@@ -257,6 +285,7 @@ export default class CraftSimulator {
         complete: this.hasMaxProgress(),
       }
     }
+    this.lastAction = action
 
     // 加工や作業
     this.progress += this._getProgressValue(a.progressEfficiency)
@@ -281,6 +310,12 @@ export default class CraftSimulator {
     }
     // 効能率なら半減
     this.cp -= this.hasCondition('pliant') ? Math.ceil(a.cp / 2) : a.cp
+    if (action === '秘訣') {
+      this.cp += 20
+      if (this.cp > this.status.cp) {
+        this.cp = this.status.cp
+      }
+    }
 
     // ターン経過処理
     if (this.manipulation > 0) {
@@ -324,7 +359,7 @@ export default class CraftSimulator {
     } else if (action === '倹約') {
       this.wasteNot = 4
     } else if (action === '長期倹約') {
-      this.this.wasteNot = 8
+      this.wasteNot = 8
     }
 
     return {
