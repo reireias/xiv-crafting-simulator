@@ -1,126 +1,128 @@
 const ACTIONS = {
-  '作業': {
+  作業: {
     progressEfficiency: 120,
     qualityEfficiency: 0,
     durability: 10,
     cp: 0,
   },
-  '確信': {
+  確信: {
     progressEfficiency: 300,
     qualityEfficiency: 0,
     durability: 10,
     cp: 6,
   },
-  '模範作業': {
+  模範作業: {
     progressEfficiency: 180,
     qualityEfficiency: 0,
     durability: 10,
     cp: 7,
   },
-  '下地作業': {
+  下地作業: {
     progressEfficiency: 360,
     qualityEfficiency: 0,
     durability: 20,
     cp: 18,
   },
-  '集中作業': {
+  集中作業: {
     progressEfficiency: 400,
     qualityEfficiency: 0,
     durability: 10,
     cp: 6,
   },
-  '精密作業': {
+  精密作業: {
     progressEfficiency: 100,
     qualityEfficiency: 100,
     durability: 10,
     cp: 6,
     inner: 1,
   },
-  '倹約作業': { // TODO: 倹約、長期倹約中に実行を禁止する
+  倹約作業: {
+    // TODO: 倹約、長期倹約中に実行を禁止する
     progressEfficiency: 180,
     qualityEfficiency: 0,
     durability: 5,
     cp: 18,
   },
-  '加工': {
+  加工: {
     progressEfficiency: 0,
     qualityEfficiency: 100,
     durability: 10,
     cp: 18,
     inner: 1,
   },
-  '中級加工': {
+  中級加工: {
     progressEfficiency: 0,
     qualityEfficiency: 125,
     durability: 10,
     cp: 18, // 加工からのコンボ前提
     inner: 1,
   },
-  '上級加工': {
+  上級加工: {
     progressEfficiency: 0,
     qualityEfficiency: 150,
     durability: 10,
     cp: 18, // 中級加工からのコンボ前提
     inner: 1,
   },
-  '倹約加工': { // TODO: 倹約、長期倹約中に実行を禁止する
+  倹約加工: {
+    // TODO: 倹約、長期倹約中に実行を禁止する
     progressEfficiency: 0,
     qualityEfficiency: 100,
     durability: 5,
     cp: 25,
     inner: 1,
   },
-  '集中加工': {
+  集中加工: {
     progressEfficiency: 0,
     qualityEfficiency: 150,
     durability: 10,
     cp: 18,
     inner: 2,
   },
-  '下地加工': {
+  下地加工: {
     progressEfficiency: 0,
     qualityEfficiency: 200,
     durability: 20,
     cp: 40,
     inner: 2,
   },
-  'ビエルゴの祝福': {
+  ビエルゴの祝福: {
     progressEfficiency: 0,
     qualityEfficiency: 100,
     durability: 10,
     cp: 24,
   },
-  'マニピュレーション': {
+  マニピュレーション: {
     progressEfficiency: 0,
     qualityEfficiency: 0,
     durability: 0,
     cp: 96,
   },
-  'ヴェネレーション': {
+  ヴェネレーション: {
     progressEfficiency: 0,
     qualityEfficiency: 0,
     durability: 0,
     cp: 18,
   },
-  'グレートストライド': {
+  グレートストライド: {
     progressEfficiency: 0,
     qualityEfficiency: 0,
     durability: 0,
     cp: 32,
   },
-  'イノベーション': {
+  イノベーション: {
     progressEfficiency: 0,
     qualityEfficiency: 0,
     durability: 0,
     cp: 18,
   },
-  '倹約': {
+  倹約: {
     progressEfficiency: 0,
     qualityEfficiency: 0,
     durability: 0,
     cp: 56,
   },
-  '長期倹約': {
+  長期倹約: {
     progressEfficiency: 0,
     qualityEfficiency: 0,
     durability: 0,
@@ -130,45 +132,47 @@ const ACTIONS = {
 
 // TODO: ステータスから計算して算出したい
 const PROGRESS_VALUE_MAP = {
-  '4027': {
-    '0': 0,
-    '100': 225,
-    '120': 270,
-    '180': 405,
-    '200': 450,
-    '300': 675,
-    '360': 810,
-    '500': 1125,
+  4027: {
+    0: 0,
+    100: 225,
+    120: 270,
+    180: 405,
+    200: 450,
+    300: 675,
+    360: 810,
+    400: 900, // 算出
+    500: 1125,
   },
-  '4047': {
-    '0': 0,
-    '100': 226,
-    '120': 271,
-    '180': 406,
-    '200': 452,
-    '300': 678,
-    '360': 813,
-    '500': 1130,
+  4047: {
+    0: 0,
+    100: 226,
+    120: 271,
+    180: 406,
+    200: 452,
+    300: 678,
+    360: 813,
+    400: 904, // 算出
+    500: 1130,
   },
 }
 const QUALITY_VALUE_MAP = {
-  '4056': {
-    '0': 0,
-    '100': 260,
-    '120': 312, // 算出
-    '125': 325,
-    '150': 390,
-    '200': 520,
-    '300': 780,
+  4056: {
+    0: 0,
+    100: 260,
+    120: 312, // 算出
+    125: 325,
+    150: 390,
+    200: 520,
+    300: 780,
   },
-  '4076': {
-    '0': 0,
-    '100': 261,
-    '120': 313, // 算出
-    '125': 326,
-    '150': 391,
-    '200': 522,
-    '300': 783,
+  4076: {
+    0: 0,
+    100: 261,
+    120: 313, // 算出
+    125: 326,
+    150: 391,
+    200: 522,
+    300: 783,
   },
 }
 
@@ -184,7 +188,7 @@ const CONDITIONS = [
 ]
 
 export default class CraftSimulator {
-  constructor(recipe, status) {
+  constructor(recipe, status, conditions = undefined) {
     this.recipe = recipe
     this.status = status
 
@@ -207,14 +211,26 @@ export default class CraftSimulator {
     this.greatStrides = 0
     this.wasteNot = 0 // 倹約
 
-    // この時点でランダムに状態を100ターン分くらい決めておく
-    this.conditions = ['normal']
-    while (this.conditions.length < 100) {
-      const next = CONDITIONS[Math.floor(Math.random() * CONDITIONS.length)]
-      this.conditions.push(next)
-      // 良兆候の次は高品質
-      if (next === 'good omen') {
-        this.conditions.push('good')
+    if (conditions) {
+      // テスト用に状態の配列を指定可能
+      this.conditions = conditions
+    } else {
+      // この時点でランダムに状態を100ターン分くらい決めておく
+      this.conditions = ['normal']
+      while (this.conditions.length < 100) {
+        const next = CONDITIONS[Math.floor(Math.random() * CONDITIONS.length)]
+        // 高品質は連続しない
+        if (
+          next === 'good' &&
+          this.conditions[this.conditions.length - 1] === 'good'
+        ) {
+          continue
+        }
+        this.conditions.push(next)
+        // 良兆候の次は高品質
+        if (next === 'good omen') {
+          this.conditions.push('good')
+        }
       }
     }
     this.turnIndex = 0
@@ -226,7 +242,14 @@ export default class CraftSimulator {
       throw new Error(`${action} is not defined in ACTIONS.`)
     }
 
-    const doAction = this.cp >= a.cp
+    let doAction = this.cp >= a.cp
+    // 集中作業・集中加工は高品質時のみ利用可能
+    if (
+      ['集中作業', '集中加工'].includes(action) &&
+      !this.hasCondition('good')
+    ) {
+      doAction = false
+    }
 
     if (!doAction) {
       return {
@@ -244,16 +267,20 @@ export default class CraftSimulator {
     this.quality += this._getQualityValue(qe)
     let du = a.durability
     if (this.wasteNot > 0) {
-      du = Math.floor(du / 2)
+      du /= 2
     }
-    this.durability -= du
+    if (this.hasCondition('sturdy')) {
+      du /= 2
+    }
+    this.durability -= Math.ceil(du)
     if (a.inner) {
       this.inner += a.inner
       if (this.inner > 10) {
         this.inner = 10
       }
     }
-    this.cp -= a.cp
+    // 効能率なら半減
+    this.cp -= this.hasCondition('pliant') ? Math.ceil(a.cp / 2) : a.cp
 
     // ターン経過処理
     if (this.manipulation > 0) {
@@ -348,13 +375,22 @@ export default class CraftSimulator {
     if (this.innovation > 0) {
       ratio += 0.5
     }
+    // 高品質
+    let goodRatio = 1
+    if (this.getCondition() === 'good') {
+      goodRatio = 1.75
+    }
     // インナークワイエットは乗算
-    return Math.floor(value * ratio * (1 + 0.1 * this.inner))
+    return Math.floor(value * ratio * (1 + 0.1 * this.inner) * goodRatio)
   }
 
   // https://github.com/daemitus/SomethingNeedDoing/blob/master/SomethingNeedDoing/Misc/ICommandInterface.cs
-  getCondition() {}
-  hasCondition() {}
+  getCondition() {
+    return this.conditions[this.turnIndex]
+  }
+  hasCondition(condition) {
+    return this.getCondition() === condition
+  }
   getProgress() {
     return this.progress
   }

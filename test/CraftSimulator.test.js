@@ -10,15 +10,20 @@ const DUMMY_STATUS = {
   control: 4056,
   cp: 672,
 }
+const DUMMY_CONDITION = new Array(100).fill('normal')
+
+const createSimulator = () => {
+  return new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS, DUMMY_CONDITION)
+}
 
 describe('ac', () => {
   test('invalid action', () => {
-    const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+    const simulator = createSimulator()
     expect(() => simulator.ac('invalid')).toThrowError()
   })
 
   test('作業', () => {
-    const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+    const simulator = createSimulator()
     simulator.ac('作業')
     expect(simulator.getProgress()).toBe(270)
     expect(simulator.getQuality()).toBe(0)
@@ -27,7 +32,7 @@ describe('ac', () => {
   })
 
   test('加工', () => {
-    const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+    const simulator = createSimulator()
     simulator.ac('加工')
     expect(simulator.getProgress()).toBe(0)
     expect(simulator.getQuality()).toBe(260)
@@ -43,7 +48,7 @@ describe('ac', () => {
 
   describe('CP', () => {
     test('消費', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('下地加工')
       expect(simulator.getProgress()).toBe(0)
       expect(simulator.getQuality()).toBe(520)
@@ -53,7 +58,7 @@ describe('ac', () => {
     })
 
     test('CP不足', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('マニピュレーション')
       simulator.ac('マニピュレーション')
       simulator.ac('マニピュレーション')
@@ -72,7 +77,7 @@ describe('ac', () => {
 
   describe('マニピュレーション', () => {
     test('効果ターン', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('加工')
       expect(simulator.getDurability()).toBe(50)
       simulator.ac('マニピュレーション')
@@ -100,7 +105,7 @@ describe('ac', () => {
     })
 
     test('回復上限', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('マニピュレーション')
       expect(simulator.getDurability()).toBe(60)
       simulator.ac('グレートストライド')
@@ -110,7 +115,7 @@ describe('ac', () => {
 
   describe('確信', () => {
     test('バフ', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('確信')
       expect(simulator.getProgress()).toBe(675)
       expect(simulator.getDurability()).toBe(50)
@@ -124,7 +129,7 @@ describe('ac', () => {
     })
 
     test('バフ重複', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('確信')
       expect(simulator.getProgress()).toBe(675)
       expect(simulator.getDurability()).toBe(50)
@@ -140,7 +145,7 @@ describe('ac', () => {
 
   describe('イノベーション', () => {
     test('効果上昇', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('加工')
       expect(simulator.getQuality()).toBe(260)
       simulator.ac('加工')
@@ -154,7 +159,7 @@ describe('ac', () => {
 
   describe('グレートストライド', () => {
     test('バフ', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('グレートストライド')
       expect(simulator.greatStrides).toBe(3)
       simulator.ac('加工')
@@ -167,13 +172,13 @@ describe('ac', () => {
 
   describe('ビエルゴの祝福', () => {
     test('単体', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('ビエルゴの祝福')
       expect(simulator.getQuality()).toBe(260)
     })
 
     test('インナークワイエット', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('加工')
       expect(simulator.inner).toBe(1)
       simulator.ac('ビエルゴの祝福')
@@ -184,12 +189,98 @@ describe('ac', () => {
 
   describe('倹約', () => {
     test('耐久値', () => {
-      const simulator = new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS)
+      const simulator = createSimulator()
       simulator.ac('倹約')
       simulator.ac('加工')
       expect(simulator.getDurability()).toBe(55)
       simulator.ac('下地加工')
       expect(simulator.getDurability()).toBe(45)
+    })
+  })
+})
+
+describe('condition', () => {
+  describe('高品質', () => {
+    test('補正', () => {
+      const conditions = ['normal', 'good']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      expect(simulator.getCondition()).toBe('normal')
+      simulator.ac('加工')
+      expect(simulator.getQuality()).toBe(260)
+      expect(simulator.getCondition()).toBe('good')
+      simulator.ac('加工')
+      expect(simulator.getQuality()).toBe(260 + Math.floor(260 * 1.1 * 1.75))
+    })
+
+    test('集中作業・集中加工', () => {
+      const conditions = ['normal', 'good', 'good']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('集中加工') // 実行されない
+      expect(simulator.getDurability()).toBe(60)
+      simulator.ac('集中作業') // 実行されない
+      expect(simulator.getDurability()).toBe(60)
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(50)
+      simulator.ac('集中加工')
+      expect(simulator.getDurability()).toBe(40)
+      simulator.ac('集中作業')
+      expect(simulator.getDurability()).toBe(30)
+    })
+  })
+
+  describe('効能率', () => {
+    test('消費CP半減', () => {
+      const conditions = ['normal', 'pliant']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('ヴェネレーション')
+      expect(simulator.getCp()).toBe(672 - 18)
+      simulator.ac('イノベーション')
+      expect(simulator.getCp()).toBe(672 - 18 - 18 / 2)
+    })
+  })
+
+  describe('頑丈', () => {
+    test('消費耐久半減', () => {
+      const conditions = ['normal', 'sturdy']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      expect(simulator.getDurability()).toBe(60)
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(50)
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(45)
+    })
+
+    test('重複', () => {
+      const conditions = ['normal', 'sturdy', 'sturdy', 'sturdy']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      expect(simulator.getDurability()).toBe(60)
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(50)
+      simulator.ac('倹約加工')
+      expect(simulator.getDurability()).toBe(47)
+      simulator.ac('倹約')
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(44)
     })
   })
 })

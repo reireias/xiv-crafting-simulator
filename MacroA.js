@@ -34,8 +34,6 @@ export default class MacroA extends MacroBase {
     if (this.check(simulator.ac('倹約作業'))) return this.result
     if (this.check(simulator.ac('模範作業'))) return this.result
     // あと1手必要だが通常状態だとCPも耐久もない
-
-    console.log('ここにはこないはず')
     return this.result
   }
 }
