@@ -33,3 +33,4 @@ const macroB = new MacroB()
 // 1500~: 3
 manager.simulate(SPLENDOROUS_5_RECIPE, NOT_MEISTER_STATUS, macroA, 50000)
 manager.simulate(SPLENDOROUS_5_RECIPE, NOT_MEISTER_STATUS, macroB, 50000)
+manager.simulate(SPLENDOROUS_5_RECIPE, MEISTER_STATUS, macroB, 50000)

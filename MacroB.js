@@ -85,12 +85,16 @@ export default class MacroB extends MacroBase {
     // 仕上げ
     if (this.check(simulator.ac('ヴェネレーション'))) return this.result
     if (this.check(simulator.ac('倹約作業'))) return this.result
-    if (this.simulator.getCp() >= 18) {
-      if (this.check(simulator.ac('倹約作業'))) return this.result
-      if (this.check(simulator.ac('作業'))) return this.result
+    if (simulator.hasCondition('good')) {
+        if (this.check(simulator.ac('集中作業'))) return this.result
     } else {
-      if (this.check(simulator.ac('模範作業'))) return this.result
-      if (this.check(simulator.ac('作業'))) return this.result
+      if (this.simulator.getCp() >= 18) {
+        if (this.check(simulator.ac('倹約作業'))) return this.result
+        if (this.check(simulator.ac('作業'))) return this.result
+      } else {
+        if (this.check(simulator.ac('模範作業'))) return this.result
+        if (this.check(simulator.ac('作業'))) return this.result
+      }
     }
     return this.result
   }
