@@ -1,28 +1,31 @@
 count = 30
 
 for i = 1, count do
+    yield("/echo 残り" .. count - i + 1 .. "回")
+    yield("/click synthesize <wait.2>")
+    yield("/waitaddon Synthesis")
     -- 初期
     yield("/ac 確信 <wait.3>")
     yield("/ac マニピュレーション <wait.3>")
-    action = HasCondition("sturdy") and "加工" or "倹約加工"
+    action = HasCondition("頑丈") and "加工" or "倹約加工"
     yield("/ac " .. action .. " <wait.3>")
 
     -- 工数上げ
     yield("/ac ヴェネレーション <wait.3>")
-    action = HasCondition("pliant") and "長期倹約" or "倹約"
+    action = HasCondition("高能率") and "長期倹約" or "倹約"
     yield("/ac " .. action .. " <wait.3>")
-    action = HasCondition("good") and "集中作業" or "下地作業"
+    action = HasCondition("高品質") and "集中作業" or "下地作業"
     yield("/ac " .. action .. " <wait.3>")
-    action = HasCondition("good") and "集中作業" or "下地作業"
+    action = HasCondition("高品質") and "集中作業" or "下地作業"
     yield("/ac " .. action .. " <wait.3>")
-    action = HasCondition("good") and "集中作業" or "下地作業"
+    action = HasCondition("高品質") and "集中作業" or "下地作業"
     yield("/ac " .. action .. " <wait.3>")
 
     -- 品質上げ
     inner = 8
     yield("/ac 加工 <wait.3>")
     yield("/ac 中級加工 <wait.3>")
-    if (HasCondition("good")) then
+    if (HasCondition("高品質")) then
         yield("/ac 集中加工 <wait.3>")
         inner = inner + 1
     else
@@ -33,7 +36,7 @@ for i = 1, count do
     yield("/ac 倹約加工 <wait.3>")
     yield("/ac 加工 <wait.3>")
     yield("/ac 中級加工 <wait.3>")
-    if (HasCondition("good")) then
+    if (HasCondition("高品質")) then
         yield("/ac 集中加工 <wait.3>")
         inner = inner + 1
     else
@@ -46,7 +49,7 @@ for i = 1, count do
 
     while (true) do
         oneMore = false
-        if (HasCondition("good")) then
+        if (HasCondition("高品質")) then
             if (restDu >= 36 + 10 and GetCp() >= 167 + 18) then
                 yield("/ac 集中加工 <wait.3>")
                 restDu = restDu - 10
@@ -73,14 +76,14 @@ for i = 1, count do
 
     -- ここから下で耐久36以上、CP167あればOK
     yield("/ac イノベーション <wait.3>")
-    if (HasCondition("good") and restDu > 35) then
+    if (HasCondition("高品質") and restDu > 35) then
         yield("/ac 集中加工 <wait.3>")
         restDu = restDu - 10
     else
         yield("/ac 倹約加工 <wait.3>")
         restDu = restDu - 5
     end
-    action = (HasCondition("good") and restDu > 30) and "集中加工" or "倹約加工"
+    action = (HasCondition("高品質") and restDu > 30) and "集中加工" or "倹約加工"
     yield("/ac " .. action .. " <wait.3>")
     yield("/ac グレートストライド <wait.3>")
     yield("/ac ビエルゴの祝福 <wait.3>")
@@ -88,7 +91,7 @@ for i = 1, count do
     -- 仕上げ
     yield("/ac ヴェネレーション <wait.3>")
     yield("/ac 倹約作業 <wait.3>")
-    if (HasCondition("good")) then
+    if (HasCondition("高品質")) then
         yield("/ac 集中作業 <wait.3>")
     else
         if (GetCp() >= 18) then
@@ -99,5 +102,5 @@ for i = 1, count do
             yield("/ac 作業 <wait.3>")
         end
     end
-    yield("/click synthesize")
+    yield("/waitaddon RecipeNote")
 end
