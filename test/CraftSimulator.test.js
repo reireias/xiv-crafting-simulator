@@ -346,6 +346,7 @@ describe('condition', () => {
   })
 })
 
+// NOTE: 実機で確認した値と一致するかのテスト
 describe('_calcProgress', () => {
   test('value', () => {
     expect(createSimulator()._calcProgress(0)).toBe(0)
