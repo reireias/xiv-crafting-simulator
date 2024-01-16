@@ -37,7 +37,6 @@ const ACTIONS = {
     inner: 1,
   },
   倹約作業: {
-    // TODO: 倹約、長期倹約中に実行を禁止する
     progressEfficiency: 180,
     qualityEfficiency: 0,
     durability: 5,
@@ -65,7 +64,6 @@ const ACTIONS = {
     inner: 1,
   },
   倹約加工: {
-    // TODO: 倹約、長期倹約中に実行を禁止する
     progressEfficiency: 0,
     qualityEfficiency: 100,
     durability: 5,
