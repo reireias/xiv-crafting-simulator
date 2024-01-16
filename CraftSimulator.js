@@ -378,6 +378,8 @@ export default class CraftSimulator {
     if (value === undefined) {
       throw new Error(`Invalid progressEfficiency: ${progressEfficiency}`)
     }
+    // TODO: ステータスから算出する
+    // const value = this._calcProgress(progressEfficiency)
     let ratio = 1
     // 確信バフ
     if (this.muscleMemory > 0 && progressEfficiency > 0) {
@@ -390,6 +392,12 @@ export default class CraftSimulator {
     return Math.floor(value * ratio)
   }
 
+  _calcProgress(e) {
+    // TODO: レシピ難易度に合わせる
+    //       現在は★ 2以上のレシピ用の係数
+    return Math.floor((this.status.craftmanship / 18 + 2) * e / 100)
+  }
+
   _getQualityValue(qualityEfficiency) {
     const map = QUALITY_VALUE_MAP[this.status.control]
     if (map === undefined) {
@@ -399,6 +407,8 @@ export default class CraftSimulator {
     if (value === undefined) {
       throw new Error(`Invalid qualityEfficiency: ${qualityEfficiency}`)
     }
+    // TODO: ステータスから算出する
+    // const value = this._calcQuality(qualityEfficiency)
 
     let ratio = 1
     // グレートストライド
@@ -417,6 +427,12 @@ export default class CraftSimulator {
     }
     // インナークワイエットは乗算
     return Math.floor(value * ratio * (1 + 0.1 * this.inner) * goodRatio)
+  }
+
+  _calcQuality(e) {
+    // TODO: レシピ難易度に合わせる
+    //       現在は★ 2以上のレシピ用の係数
+    return Math.floor((this.status.control / 18 + 35) * e / 100)
   }
 
   // https://github.com/daemitus/SomethingNeedDoing/blob/master/SomethingNeedDoing/Misc/ICommandInterface.cs

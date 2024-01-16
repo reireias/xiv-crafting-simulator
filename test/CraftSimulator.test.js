@@ -10,6 +10,11 @@ const DUMMY_STATUS = {
   control: 4056,
   cp: 672,
 }
+const MEISTER_STATUS = {
+  craftmanship: 4047,
+  control: 4076,
+  cp: 687,
+}
 const DUMMY_CONDITION = new Array(100).fill('normal')
 
 const createSimulator = () => {
@@ -338,5 +343,57 @@ describe('condition', () => {
       simulator.ac('加工')
       expect(simulator.getDurability()).toBe(44)
     })
+  })
+})
+
+describe('_calcProgress', () => {
+  test.skip('value', () => {
+    expect(createSimulator()._calcProgress(0)).toBe(0)
+    expect(createSimulator()._calcProgress(100)).toBe(225)
+    expect(createSimulator()._calcProgress(120)).toBe(270)
+    expect(createSimulator()._calcProgress(180)).toBe(405)
+    expect(createSimulator()._calcProgress(200)).toBe(450)
+    expect(createSimulator()._calcProgress(300)).toBe(675)
+    expect(createSimulator()._calcProgress(360)).toBe(810)
+    // expect(createSimulator()._calcProgress(400)).toBe(900)
+    expect(createSimulator()._calcProgress(500)).toBe(1125)
+
+    // マイスターステータスでも検証
+    const createMeisterSim = () => {
+      return new CraftSimulator(DUMMY_RECIPE, MEISTER_STATUS, DUMMY_CONDITION)
+    }
+    expect(createMeisterSim()._calcProgress(0)).toBe(0)
+    expect(createMeisterSim()._calcProgress(100)).toBe(226)
+    expect(createMeisterSim()._calcProgress(120)).toBe(271)
+    expect(createMeisterSim()._calcProgress(180)).toBe(406)
+    expect(createMeisterSim()._calcProgress(200)).toBe(452)
+    expect(createMeisterSim()._calcProgress(300)).toBe(678)
+    expect(createMeisterSim()._calcProgress(360)).toBe(813)
+    // expect(createMeisterSim()._calcProgress(400)).toBe(904)
+    expect(createMeisterSim()._calcProgress(500)).toBe(1130)
+  })
+})
+
+describe('_calcQuality', () => {
+  test.skip('value', () => {
+    expect(createSimulator()._calcQuality(0)).toBe(0)
+    expect(createSimulator()._calcQuality(100)).toBe(260)
+    // expect(createSimulator()._calcQuality(120)).toBe(312)
+    expect(createSimulator()._calcQuality(125)).toBe(325)
+    expect(createSimulator()._calcQuality(150)).toBe(390)
+    expect(createSimulator()._calcQuality(200)).toBe(520)
+    expect(createSimulator()._calcQuality(300)).toBe(780)
+
+    // マイスターステータスでも検証
+    const createMeisterSim = () => {
+      return new CraftSimulator(DUMMY_RECIPE, MEISTER_STATUS, DUMMY_CONDITION)
+    }
+    expect(createMeisterSim()._calcQuality(0)).toBe(0)
+    expect(createMeisterSim()._calcQuality(100)).toBe(261)
+    // expect(createMeisterSim()._calcQuality(120)).toBe(313)
+    expect(createMeisterSim()._calcQuality(125)).toBe(326)
+    expect(createMeisterSim()._calcQuality(150)).toBe(391)
+    expect(createMeisterSim()._calcQuality(200)).toBe(522)
+    expect(createMeisterSim()._calcQuality(300)).toBe(783)
   })
 })
