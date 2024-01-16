@@ -66,5 +66,6 @@ th = [750, 1125, 1500]
 // 1200~: 2
 // 1600~: 3
 th = [800, 1200, 1600]
-manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroB, 50000, th)
-manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroC, 50000, th)
+// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroB, 50000, th)
+// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroC, 50000, th)
+manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroC, 10000, th)

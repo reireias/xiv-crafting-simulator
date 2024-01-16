@@ -209,6 +209,7 @@ export default class CraftSimulator {
       }
     }
     this.turnIndex = 0
+    this.history = []
   }
 
   // 5段階目の状態配列を生成
@@ -302,6 +303,7 @@ export default class CraftSimulator {
       }
     }
     this.lastAction = action
+    this.history.push(action)
 
     // 加工や作業
     let pe = a.progressEfficiency
