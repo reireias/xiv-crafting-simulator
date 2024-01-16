@@ -347,7 +347,7 @@ describe('condition', () => {
 })
 
 describe('_calcProgress', () => {
-  test.skip('value', () => {
+  test('value', () => {
     expect(createSimulator()._calcProgress(0)).toBe(0)
     expect(createSimulator()._calcProgress(100)).toBe(225)
     expect(createSimulator()._calcProgress(120)).toBe(270)
@@ -375,7 +375,7 @@ describe('_calcProgress', () => {
 })
 
 describe('_calcQuality', () => {
-  test.skip('value', () => {
+  test('value', () => {
     expect(createSimulator()._calcQuality(0)).toBe(0)
     expect(createSimulator()._calcQuality(100)).toBe(260)
     // expect(createSimulator()._calcQuality(120)).toBe(312)

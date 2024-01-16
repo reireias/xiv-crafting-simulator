@@ -238,7 +238,7 @@ export default class CraftSimulator {
           next = 'normal'
         } else if (r >= 0.95) {
           next = 'good'
-        } else if (r >= 0.90) {
+        } else if (r >= 0.9) {
           next = 'good omen'
         } else {
           next = CONDITIONS[Math.floor(Math.random() * 3) + 2]
@@ -370,16 +370,7 @@ export default class CraftSimulator {
 
   // ステータスと効率から実際に上昇する量を返す
   _getProgressValue(progressEfficiency) {
-    const map = PROGRESS_VALUE_MAP[this.status.craftmanship]
-    if (map === undefined) {
-      throw new Error(`Invalid craftmanship: ${this.status.craftmanship}`)
-    }
-    const value = map[progressEfficiency]
-    if (value === undefined) {
-      throw new Error(`Invalid progressEfficiency: ${progressEfficiency}`)
-    }
-    // TODO: ステータスから算出する
-    // const value = this._calcProgress(progressEfficiency)
+    const value = this._calcProgress(progressEfficiency)
     let ratio = 1
     // 確信バフ
     if (this.muscleMemory > 0 && progressEfficiency > 0) {
@@ -395,20 +386,11 @@ export default class CraftSimulator {
   _calcProgress(e) {
     // TODO: レシピ難易度に合わせる
     //       現在は★ 2以上のレシピ用の係数
-    return Math.floor((this.status.craftmanship / 18 + 2) * e / 100)
+    return Math.floor((Math.floor(this.status.craftmanship / 18 + 2) * e) / 100)
   }
 
   _getQualityValue(qualityEfficiency) {
-    const map = QUALITY_VALUE_MAP[this.status.control]
-    if (map === undefined) {
-      throw new Error(`Invalid control: ${this.status.control}`)
-    }
-    const value = map[qualityEfficiency]
-    if (value === undefined) {
-      throw new Error(`Invalid qualityEfficiency: ${qualityEfficiency}`)
-    }
-    // TODO: ステータスから算出する
-    // const value = this._calcQuality(qualityEfficiency)
+    const value = this._calcQuality(qualityEfficiency)
 
     let ratio = 1
     // グレートストライド
@@ -432,7 +414,7 @@ export default class CraftSimulator {
   _calcQuality(e) {
     // TODO: レシピ難易度に合わせる
     //       現在は★ 2以上のレシピ用の係数
-    return Math.floor((this.status.control / 18 + 35) * e / 100)
+    return Math.floor((Math.floor(this.status.control / 18 + 35) * e) / 100)
   }
 
   // https://github.com/daemitus/SomethingNeedDoing/blob/master/SomethingNeedDoing/Misc/ICommandInterface.cs
