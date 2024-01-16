@@ -140,8 +140,7 @@ const ACTIONS = {
   },
 }
 
-// TODO: 5段階と6段階で指定できるように
-// これは5段階目
+// 5段階目
 const CONDITIONS_5 = [
   'normal', // 通常
   'good', // 高品質
@@ -150,6 +149,7 @@ const CONDITIONS_5 = [
   'sturdy', // 頑丈
   'good omen', // 良兆候
 ]
+// 6段階目
 const CONDITIONS_6 = [
   'normal', // 通常
   'good', // 高品質
@@ -159,6 +159,16 @@ const CONDITIONS_6 = [
   'primed', // 長持続
   'good omen', // 良兆候
 ]
+const CONDITION_MAP = {
+  normal: '通常',
+  good: '高品質',
+  pliant: '高能率',
+  centered: '安定',
+  sturdy: '頑丈',
+  'good omen': '良兆候',
+  malleable: '高進捗',
+  primed: '長持続',
+}
 
 export default class CraftSimulator {
   constructor(recipe, status, conditions = undefined) {
@@ -272,7 +282,7 @@ export default class CraftSimulator {
     // 集中作業・集中加工・秘訣は高品質時のみ利用可能
     if (
       ['集中作業', '集中加工', '秘訣'].includes(action) &&
-      !this.hasCondition('good')
+      !this.hasRawCondition('good')
     ) {
       doAction = false
     }
@@ -295,7 +305,8 @@ export default class CraftSimulator {
 
     // 加工や作業
     let pe = a.progressEfficiency
-    if (this.hasCondition('malleable')) { // 高進捗は1.5倍
+    if (this.hasRawCondition('malleable')) {
+      // 高進捗は1.5倍
       pe = Math.floor(pe * 1.5)
     }
     this.progress += this._getProgressValue(pe)
@@ -308,7 +319,7 @@ export default class CraftSimulator {
     if (this.wasteNot > 0) {
       du /= 2
     }
-    if (this.hasCondition('sturdy')) {
+    if (this.hasRawCondition('sturdy')) {
       du /= 2
     }
     this.durability -= Math.ceil(du)
@@ -319,7 +330,7 @@ export default class CraftSimulator {
       }
     }
     // 効能率なら半減
-    this.cp -= this.hasCondition('pliant') ? Math.ceil(a.cp / 2) : a.cp
+    this.cp -= this.hasRawCondition('pliant') ? Math.ceil(a.cp / 2) : a.cp
     if (action === '秘訣') {
       this.cp += 20
       if (this.cp > this.status.cp) {
@@ -356,19 +367,19 @@ export default class CraftSimulator {
 
     // バフ追加
     if (action === 'マニピュレーション') {
-      this.manipulation = this.hasCondition('primed') ? 10 : 8
+      this.manipulation = this.hasRawCondition('primed') ? 10 : 8
     } else if (action === '確信') {
-      this.muscleMemory = this.hasCondition('primed') ? 7 : 5
+      this.muscleMemory = this.hasRawCondition('primed') ? 7 : 5
     } else if (action === 'ヴェネレーション') {
-      this.veneration = this.hasCondition('primed') ? 6 : 4
+      this.veneration = this.hasRawCondition('primed') ? 6 : 4
     } else if (action === 'イノベーション') {
-      this.innovation = this.hasCondition('primed') ? 6 : 4
+      this.innovation = this.hasRawCondition('primed') ? 6 : 4
     } else if (action === 'グレートストライド') {
-      this.greatStrides = this.hasCondition('primed') ? 5 : 3
+      this.greatStrides = this.hasRawCondition('primed') ? 5 : 3
     } else if (action === '倹約') {
-      this.wasteNot = this.hasCondition('primed') ? 6 : 4
+      this.wasteNot = this.hasRawCondition('primed') ? 6 : 4
     } else if (action === '長期倹約') {
-      this.wasteNot = this.hasCondition('primed') ? 10 : 8
+      this.wasteNot = this.hasRawCondition('primed') ? 10 : 8
     }
     this.turnIndex += 1
 
@@ -414,7 +425,7 @@ export default class CraftSimulator {
     }
     // 高品質
     let goodRatio = 1
-    if (this.getCondition() === 'good') {
+    if (this.getRawCondition() === 'good') {
       goodRatio = 1.75
     }
     // インナークワイエットは乗算
@@ -427,9 +438,15 @@ export default class CraftSimulator {
     return Math.floor((Math.floor(this.status.control / 18 + 35) * e) / 100)
   }
 
+  getRawCondition() {
+    return this.conditions[this.turnIndex]
+  }
+  hasRawCondition(condition) {
+    return this.getRawCondition() === condition
+  }
   // https://github.com/daemitus/SomethingNeedDoing/blob/master/SomethingNeedDoing/Misc/ICommandInterface.cs
   getCondition() {
-    return this.conditions[this.turnIndex]
+    return CONDITION_MAP[this.conditions[this.turnIndex]]
   }
   hasCondition(condition) {
     return this.getCondition() === condition

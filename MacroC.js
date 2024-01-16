@@ -1,7 +1,6 @@
 import MacroBase from './MacroBase.js'
 export default class MacroB extends MacroBase {
-  // 5段階目用マクロ
-  // 飯(チャイ)のみ想定
+  // 最終段階用マクロ
   run(simulator) {
     this.simulator = simulator
     this.result = {

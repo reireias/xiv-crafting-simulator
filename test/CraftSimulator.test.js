@@ -294,10 +294,10 @@ describe('condition', () => {
         DUMMY_STATUS,
         conditions
       )
-      expect(simulator.getCondition()).toBe('normal')
+      expect(simulator.getCondition()).toBe('通常')
       simulator.ac('加工')
       expect(simulator.getQuality()).toBe(260)
-      expect(simulator.getCondition()).toBe('good')
+      expect(simulator.getCondition()).toBe('高品質')
       simulator.ac('加工')
       expect(simulator.getQuality()).toBe(260 + Math.floor(260 * 1.1 * 1.75))
     })
