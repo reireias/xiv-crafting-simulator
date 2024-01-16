@@ -144,13 +144,22 @@ const ACTIONS = {
 
 // TODO: 5段階と6段階で指定できるように
 // これは5段階目
-const CONDITIONS = [
+const CONDITIONS_5 = [
   'normal', // 通常
   'good', // 高品質
   'pliant', // 高能率
   'centered', // 安定
   'sturdy', // 頑丈
-  'good omen', // 良兆候 TODO: 実機でチェック
+  'good omen', // 良兆候
+]
+const CONDITIONS_6 = [
+  'normal', // 通常
+  'good', // 高品質
+  'pliant', // 高能率
+  'sturdy', // 頑丈
+  'malleable', // 高進捗
+  'primed', // 長持続
+  'good omen', // 良兆候
 ]
 
 export default class CraftSimulator {
@@ -182,36 +191,77 @@ export default class CraftSimulator {
       this.conditions = conditions
     } else {
       // この時点でランダムに状態を100ターン分くらい決めておく
-      this.conditions = ['normal']
-      while (this.conditions.length < 100) {
-        // 通常が50%, 高品質5%, 良兆候5%, 安定・頑丈・高能率残り
-        // 参考: https://jp.finalfantasyxiv.com/lodestone/character/5483630/blog/4382417/
-        let next
-        const r = Math.random()
-        if (r < 0.5) {
-          next = 'normal'
-        } else if (r >= 0.95) {
-          next = 'good'
-        } else if (r >= 0.9) {
-          next = 'good omen'
-        } else {
-          next = CONDITIONS[Math.floor(Math.random() * 3) + 2]
-        }
-        // 高品質は連続しない
-        if (
-          next === 'good' &&
-          this.conditions[this.conditions.length - 1] === 'good'
-        ) {
-          continue
-        }
-        this.conditions.push(next)
-        // 良兆候の次は高品質
-        if (next === 'good omen') {
-          this.conditions.push('good')
-        }
+      if (recipe.expertType === 5) {
+        this.conditions = this._createSplendorous5Conditions()
+      } else if (recipe.expertType === 6) {
+        this.conditions = this._createSplendorous6Conditions()
+      } else {
+        // 通常レシピ
+        this.conditions = [] // TODO: 通常レシピの状態配列を生成する
       }
     }
     this.turnIndex = 0
+  }
+
+  // 5段階目の状態配列を生成
+  _createSplendorous5Conditions() {
+    const conditions = ['normal']
+    while (conditions.length < 100) {
+      // 通常が50%, 高品質5%, 良兆候5%, 安定・頑丈・高能率残り
+      // 参考: https://jp.finalfantasyxiv.com/lodestone/character/5483630/blog/4382417/
+      let next
+      const r = Math.random()
+      if (r < 0.5) {
+        next = 'normal'
+      } else if (r >= 0.95) {
+        next = 'good'
+      } else if (r >= 0.9) {
+        next = 'good omen'
+      } else {
+        next = CONDITIONS_5[Math.floor(Math.random() * 3) + 2]
+      }
+      // 高品質は連続しない
+      if (next === 'good' && conditions[conditions.length - 1] === 'good') {
+        continue
+      }
+      conditions.push(next)
+      // 良兆候の次は高品質
+      if (next === 'good omen') {
+        conditions.push('good')
+      }
+    }
+    return conditions
+  }
+
+  // 6段階目の状態配列を生成
+  // 高進捗と長持続が追加され、安定は発生しなくなる
+  _createSplendorous6Conditions() {
+    const conditions = ['normal']
+    while (conditions.length < 100) {
+      // 通常が50%, 高品質5%, 良兆候5%, 頑丈・高能率・高進捗・長持続残り
+      // 参考: https://jp.finalfantasyxiv.com/lodestone/character/5483630/blog/4382417/
+      let next
+      const r = Math.random()
+      if (r < 0.5) {
+        next = 'normal'
+      } else if (r >= 0.95) {
+        next = 'good'
+      } else if (r >= 0.9) {
+        next = 'good omen'
+      } else {
+        next = CONDITIONS_6[Math.floor(Math.random() * 4) + 2]
+      }
+      // 高品質は連続しない
+      if (next === 'good' && conditions[conditions.length - 1] === 'good') {
+        continue
+      }
+      conditions.push(next)
+      // 良兆候の次は高品質
+      if (next === 'good omen') {
+        conditions.push('good')
+      }
+    }
+    return conditions
   }
 
   ac(action) {
@@ -228,6 +278,10 @@ export default class CraftSimulator {
     ) {
       doAction = false
     }
+    // 倹約加工・倹約作業は倹約効果中は利用不可
+    if (['倹約加工', '倹約作業'].includes(action) && this.wasteNot > 0) {
+      doAction = false
+    }
     // 匠の神業はインナークワイエット10でのみ利用可能
     if (action === '匠の神業' && this.inner < 10) {
       doAction = false
@@ -242,7 +296,11 @@ export default class CraftSimulator {
     this.lastAction = action
 
     // 加工や作業
-    this.progress += this._getProgressValue(a.progressEfficiency)
+    let pe = a.progressEfficiency
+    if (this.hasCondition('malleable')) { // 高進捗は1.5倍
+      pe = Math.floor(pe * 1.5)
+    }
+    this.progress += this._getProgressValue(pe)
     let qe = a.qualityEfficiency
     if (action === 'ビエルゴの祝福') {
       qe += this.inner * 20
@@ -297,24 +355,24 @@ export default class CraftSimulator {
     if (action === 'ビエルゴの祝福') {
       this.inner = 0
     }
-    this.turnIndex += 1
 
     // バフ追加
     if (action === 'マニピュレーション') {
-      this.manipulation = 8
+      this.manipulation = this.hasCondition('primed') ? 10 : 8
     } else if (action === '確信') {
-      this.muscleMemory = 5
+      this.muscleMemory = this.hasCondition('primed') ? 7 : 5
     } else if (action === 'ヴェネレーション') {
-      this.veneration = 4
+      this.veneration = this.hasCondition('primed') ? 6 : 4
     } else if (action === 'イノベーション') {
-      this.innovation = 4
+      this.innovation = this.hasCondition('primed') ? 6 : 4
     } else if (action === 'グレートストライド') {
-      this.greatStrides = 3
+      this.greatStrides = this.hasCondition('primed') ? 5 : 3
     } else if (action === '倹約') {
-      this.wasteNot = 4
+      this.wasteNot = this.hasCondition('primed') ? 6 : 4
     } else if (action === '長期倹約') {
-      this.wasteNot = 8
+      this.wasteNot = this.hasCondition('primed') ? 10 : 8
     }
+    this.turnIndex += 1
 
     return {
       finish: this.hasMaxProgress() || this.durability <= 0,

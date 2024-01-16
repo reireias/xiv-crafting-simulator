@@ -21,6 +21,22 @@ const createSimulator = () => {
   return new CraftSimulator(DUMMY_RECIPE, DUMMY_STATUS, DUMMY_CONDITION)
 }
 
+describe('constructor', () => {
+  test('expertType', () => {
+    const recipe = {
+      durability: 60,
+      progress: 6600,
+      quality: 15368,
+      expertType: 5,
+    }
+    let simulator = new CraftSimulator(recipe, DUMMY_STATUS, DUMMY_CONDITION)
+    expect(simulator.conditions).toHaveLength(100)
+    recipe.expertType = 6
+    simulator = new CraftSimulator(recipe, DUMMY_STATUS, DUMMY_CONDITION)
+    expect(simulator.conditions).toHaveLength(100)
+  })
+})
+
 describe('ac', () => {
   test('invalid action', () => {
     const simulator = createSimulator()
@@ -201,6 +217,15 @@ describe('ac', () => {
       simulator.ac('下地加工')
       expect(simulator.getDurability()).toBe(45)
     })
+
+    test('倹約加工・倹約作業が実行不可能', () => {
+      const simulator = createSimulator()
+      simulator.ac('倹約')
+      simulator.ac('倹約加工')
+      expect(simulator.getDurability()).toBe(60)
+      simulator.ac('倹約作業')
+      expect(simulator.getDurability()).toBe(60)
+    })
   })
 
   describe('匠の神業', () => {
@@ -342,6 +367,48 @@ describe('condition', () => {
       simulator.ac('倹約')
       simulator.ac('加工')
       expect(simulator.getDurability()).toBe(44)
+    })
+  })
+
+  describe('高進捗', () => {
+    test('進捗1.5倍', () => {
+      const conditions = ['normal', 'malleable']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('作業')
+      expect(simulator.getProgress()).toBe(270)
+      simulator.ac('作業')
+      expect(simulator.getProgress()).toBe(270 + 270 * 1.5)
+    })
+
+    test('重複', () => {
+      const conditions = ['normal', 'normal', 'malleable']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('確信')
+      expect(simulator.getProgress()).toBe(675)
+      simulator.ac('ヴェネレーション')
+      simulator.ac('作業')
+      expect(simulator.getProgress()).toBe(675 + Math.floor(270 * 1.5 * 2.5))
+    })
+  })
+
+  describe('長持続', () => {
+    test('ターン増加', () => {
+      const conditions = ['primed']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('ヴェネレーション')
+      expect(simulator.veneration).toBe(6)
     })
   })
 })
