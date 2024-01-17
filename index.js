@@ -2,6 +2,7 @@ import SimulationManager from './SimulationManager.js'
 import MacroA from './MacroA.js'
 import MacroB from './MacroB.js'
 import MacroC from './MacroC.js'
+import MacroD from './MacroD.js'
 
 // モーエンツール5段階
 const SPLENDOROUS_5_RECIPE = {
@@ -53,6 +54,7 @@ const manager = new SimulationManager()
 const macroA = new MacroA()
 const macroB = new MacroB()
 const macroC = new MacroC()
+const macroD = new MacroD()
 
 let th
 // 1125~: 2
@@ -69,3 +71,4 @@ th = [800, 1200, 1600]
 // manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroB, 50000, th)
 // manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroC, 50000, th)
 manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroC, 10000, th)
+// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroD, 10000, th)

@@ -208,6 +208,30 @@ describe('ac', () => {
     })
   })
 
+  describe('ヘイスティタッチ', () => {
+    test('消費', () => {
+      const simulator = createSimulator()
+      simulator.ac('ヘイスティタッチ')
+      expect(simulator.cp).toBe(DUMMY_STATUS.cp)
+      expect(simulator.durability).toBe(50)
+    })
+
+    test('確率で成功したり失敗したり', () => {
+      const q = []
+      const inner = []
+      for (let i = 1; i < 100; i++) {
+        const simulator = createSimulator()
+        simulator.ac('ヘイスティタッチ')
+        q.push(simulator.getQuality())
+        inner.push(simulator.inner)
+      }
+      expect(Math.min(...q)).toBe(0)
+      expect(Math.max(...q)).toBe(260)
+      expect(Math.min(...inner)).toBe(0)
+      expect(Math.max(...inner)).toBe(1)
+    })
+  })
+
   describe('倹約', () => {
     test('耐久値', () => {
       const simulator = createSimulator()
@@ -281,6 +305,55 @@ describe('ac', () => {
       expect(simulator.getCp()).toBe(672 - 96)
       simulator.ac('秘訣')
       expect(simulator.getCp()).toBe(672 - 96)
+    })
+  })
+
+  describe('経過観察', () => {
+    test('ターン経過', () => {
+      const simulator = createSimulator()
+      simulator.ac('経過観察')
+      expect(simulator.getProgress()).toBe(0)
+      expect(simulator.getQuality()).toBe(0)
+      expect(simulator.getCp()).toBe(672 - 7)
+      expect(simulator.turnIndex).toBe(1)
+    })
+  })
+
+  describe('注視作業', () => {
+    test('実行', () => {
+      const simulator = createSimulator()
+      simulator.ac('経過観察')
+      simulator.ac('注視作業')
+      expect(simulator.getProgress()).toBe(450)
+      expect(simulator.getQuality()).toBe(0)
+      expect(simulator.getDurability()).toBe(50)
+    })
+
+    test('経過観察なしで実行不可', () => {
+      const simulator = createSimulator()
+      simulator.ac('注視作業')
+      expect(simulator.getProgress()).toBe(0)
+      expect(simulator.getQuality()).toBe(0)
+      expect(simulator.getDurability()).toBe(60)
+    })
+  })
+
+  describe('注視加工', () => {
+    test('実行', () => {
+      const simulator = createSimulator()
+      simulator.ac('経過観察')
+      simulator.ac('注視加工')
+      expect(simulator.getProgress()).toBe(0)
+      expect(simulator.getQuality()).toBe(390)
+      expect(simulator.getDurability()).toBe(50)
+    })
+
+    test('経過観察なしで実行不可', () => {
+      const simulator = createSimulator()
+      simulator.ac('注視加工')
+      expect(simulator.getProgress()).toBe(0)
+      expect(simulator.getQuality()).toBe(0)
+      expect(simulator.getDurability()).toBe(60)
     })
   })
 })

@@ -7,6 +7,10 @@ export default class MacroBase {
       this.result = {
         complete: state.complete
       }
+      if (!state.complete) {
+        const history = this.simulator.history
+        console.log('未完成: ' + this.simulator.lastAction, this.simulator.turnIndex, history[history.length - 2], history[history.length - 3], history[history.length - 4])
+      }
       return true
     }
     return false

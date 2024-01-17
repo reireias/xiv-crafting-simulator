@@ -42,6 +42,12 @@ const ACTIONS = {
     durability: 5,
     cp: 18,
   },
+  注視作業: {
+    progressEfficiency: 200,
+    qualityEfficiency: 0,
+    durability: 10,
+    cp: 5,
+  },
   加工: {
     progressEfficiency: 0,
     qualityEfficiency: 100,
@@ -84,6 +90,13 @@ const ACTIONS = {
     cp: 40,
     inner: 2,
   },
+  注視加工: {
+    progressEfficiency: 0,
+    qualityEfficiency: 150,
+    durability: 10,
+    cp: 18,
+    inner: 1,
+  },
   ビエルゴの祝福: {
     progressEfficiency: 0,
     qualityEfficiency: 100,
@@ -95,6 +108,14 @@ const ACTIONS = {
     qualityEfficiency: 100,
     durability: 0,
     cp: 32,
+  },
+  ヘイスティタッチ: {
+    progressEfficiency: 0,
+    qualityEfficiency: 100,
+    durability: 10,
+    cp: 0,
+    inner: 1,
+    probability: 0.6, // 成功確率
   },
   マニピュレーション: {
     progressEfficiency: 0,
@@ -137,6 +158,12 @@ const ACTIONS = {
     qualityEfficiency: 0,
     durability: 0,
     cp: 0,
+  },
+  経過観察: {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 7,
   },
 }
 
@@ -280,6 +307,9 @@ export default class CraftSimulator {
     }
 
     let doAction = this.cp >= a.cp
+    if (!doAction) {
+      console.log('CP不足: ' + action)
+    }
     // 集中作業・集中加工・秘訣は高品質時のみ利用可能
     if (
       ['集中作業', '集中加工', '秘訣'].includes(action) &&
@@ -289,6 +319,10 @@ export default class CraftSimulator {
     }
     // 倹約加工・倹約作業は倹約効果中は利用不可
     if (['倹約加工', '倹約作業'].includes(action) && this.wasteNot > 0) {
+      doAction = false
+    }
+    // 注視加工・注視作業は経過観察の後でしか利用できない
+    if (['注視加工', '注視作業'].includes(action) && this.lastAction !== '経過観察') {
       doAction = false
     }
     // 匠の神業はインナークワイエット10でのみ利用可能
@@ -305,6 +339,11 @@ export default class CraftSimulator {
     this.lastAction = action
     this.history.push(action)
 
+    let success = true
+    if (a.probability) {
+      success = Math.random() < a.probability
+    }
+
     // 加工や作業
     let pe = a.progressEfficiency
     if (this.hasRawCondition('malleable')) {
@@ -316,7 +355,7 @@ export default class CraftSimulator {
     if (action === 'ビエルゴの祝福') {
       qe += this.inner * 20
     }
-    this.quality += this._getQualityValue(qe)
+    this.quality += success ? this._getQualityValue(qe) : 0
     let du = a.durability
     if (this.wasteNot > 0) {
       du /= 2
@@ -326,7 +365,7 @@ export default class CraftSimulator {
     }
     this.durability -= Math.ceil(du)
     if (a.inner) {
-      this.inner += a.inner
+      this.inner += success ? a.inner : 0
       if (this.inner > 10) {
         this.inner = 10
       }
