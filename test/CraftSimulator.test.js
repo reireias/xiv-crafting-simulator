@@ -356,6 +356,27 @@ describe('ac', () => {
       expect(simulator.getDurability()).toBe(60)
     })
   })
+
+  describe('マスターズメンド', () => {
+    test('回復', () => {
+      const simulator = createSimulator()
+      simulator.ac('加工')
+      simulator.ac('加工')
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(30)
+      simulator.ac('マスターズメンド')
+      expect(simulator.getDurability()).toBe(60)
+    })
+
+    test('上限を超えない', () => {
+      const simulator = createSimulator()
+      simulator.ac('加工')
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(40)
+      simulator.ac('マスターズメンド')
+      expect(simulator.getDurability()).toBe(60)
+    })
+  })
 })
 
 describe('condition', () => {

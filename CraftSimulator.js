@@ -165,6 +165,12 @@ const ACTIONS = {
     durability: 0,
     cp: 7,
   },
+  マスターズメンド: {
+    progressEfficiency: 0,
+    qualityEfficiency: 0,
+    durability: 0,
+    cp: 88,
+  }
 }
 
 // 5段階目
@@ -404,6 +410,12 @@ export default class CraftSimulator {
     }
     if (action === 'ビエルゴの祝福') {
       this.inner = 0
+    }
+    if (action === 'マスターズメンド') {
+      this.durability += 30
+      if (this.durability > this.recipe.durability) {
+      this.durability = this.recipe.durability
+      }
     }
 
     // バフ追加
