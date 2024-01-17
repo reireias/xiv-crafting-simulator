@@ -42,6 +42,12 @@ const NOT_MEISTER_STATUS5 = {
   control: 4064, // 加工精度
   cp: 672,
 }
+// 非マイスター(飯: チャイ + 薬酒)
+const NOT_MEISTER_STATUS5_MED = {
+  craftmanship: 4039, // 作業精度
+  control: 4064, // 加工精度
+  cp: 672 + 21,
+}
 
 // マイスター(飯: チャイ)
 const MEISTER_STATUS5 = {
@@ -71,4 +77,5 @@ th = [800, 1200, 1600]
 // manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroB, 50000, th)
 // manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroC, 50000, th)
 manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroC, 10000, th)
+// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5_MED, macroC, 10000, th)
 // manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroD, 10000, th)

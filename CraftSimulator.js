@@ -390,6 +390,7 @@ export default class CraftSimulator {
       this.manipulation -= 1
       this.durability += 5
       if (this.durability > this.getMaxDurability()) {
+        // console.log('マニピュレーションが無駄になった', action)
         this.durability = this.getMaxDurability()
       }
     }

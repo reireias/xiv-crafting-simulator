@@ -155,6 +155,14 @@ export default class MacroB extends MacroBase {
         break
       }
       // TODO: 状態によっては早めに切り上げる？
+      if (simulator.wasteNot < 1) {
+        if (simulator.hasCondition('高能率') && simulator.manipulation < 2) {
+          break
+        }
+        if (simulator.hasCondition('長持続') && simulator.manipulation < 1) {
+          break
+        }
+      }
       if (simulator.wasteNot > 0) {
         if (simulator.hasCondition('高品質')) {
           if (this.check(simulator.ac('集中加工'))) return this.result
@@ -244,13 +252,16 @@ export default class MacroB extends MacroBase {
     // console.log(restDu - needDu)
     // 余力で品質上げ
     while (true) {
+      // 耐久消費をしないアクションを使った際に、マニピュレーションが無駄になる量
+      const lostRestDu = simulator.manipulation ? Math.max(simulator.durability + 5 - simulator.recipe.durability, 0) : 0
       if (simulator.hasCondition('高品質')) {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
           if (this.check(simulator.ac('集中加工'))) return this.result
           restDu -= 10
           continue
-        } else {
+        } else if (needDu + lostRestDu <= restDu) {
           if (this.check(simulator.ac('秘訣'))) return this.result
+          restDu -= lostRestDu
           continue
         }
       } else if (simulator.hasCondition('頑丈')) {
@@ -258,48 +269,79 @@ export default class MacroB extends MacroBase {
           if (this.check(simulator.ac('下地加工'))) return this.result
           restDu -= 10
           continue
+        } else if (needDu + 5 <= restDu && simulator.durability > 5 && needCp + 18 <= simulator.cp) {
+          if (this.check(simulator.ac('加工'))) return this.result
+          restDu -= 5
+          continue
         }
       } else if (simulator.hasCondition('良兆候')) {
-        if (needDu + 10 <= restDu && simulator.durability > 5 && needCp + 25 <= simulator.cp) {
+        if (needDu + 10 + lostRestDu <= restDu && simulator.durability > 5 && needCp + 25 <= simulator.cp) {
           if (this.check(simulator.ac('経過観察'))) return this.result
+          restDu -= lostRestDu
           if (this.check(simulator.ac('注視加工'))) return this.result
           restDu -= 10
           continue
         }
-      } else {
-        if (simulator.inner === 10 && needCp + 32 <= simulator.cp) {
-          if (this.check(simulator.ac('匠の神業'))) return this.result
-          continue
-        }
-        if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
-          if (this.check(simulator.ac('加工'))) return this.result
-          restDu -= 10
-          continue
-        }
-        if (restDu - needDu < 10 && simulator.cp - needCp > 40) {
-          console.log('耐久はないがCPが余ってる')
-          // マスターズメント絡めていろいろ
-        }
-        if (restDu - needDu >= 10 && simulator.cp - needCp < 10) {
-          console.log('CPはないが耐久は余ってる')
-          // ヘイスティパターン
-        }
+      }
+
+      if (simulator.inner === 10 && needDu + lostRestDu <= restDu && needCp + 32 <= simulator.cp) {
+        if (this.check(simulator.ac('匠の神業'))) return this.result
+        restDu -= lostRestDu
+        continue
+      }
+      if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
+        if (this.check(simulator.ac('加工'))) return this.result
+        restDu -= 10
+        continue
+      }
+      const masterCp = simulator.hasCondition('高能率') ? 44 : 88
+      if (needDu + lostRestDu <= restDu && needCp + masterCp <= simulator.cp && simulator.manipulation === 0) {
+        const upDu = Math.min(simulator.recipe.durability - simulator.durability, 30)
+        if (this.check(simulator.ac('マスターズメンド'))) return this.result
+        restDu += upDu
+        restDu -= lostRestDu
+        continue
+      }
+      if (needDu + 10 <= restDu && simulator.durability > 10) {
+        if (this.check(simulator.ac('ヘイスティタッチ'))) return this.result
+        restDu -= 10
+        continue
+      }
+      if (needDu + lostRestDu <= restDu && needCp + 7 <= simulator.cp && (needCp + 7 + 44 <= simulator.cp || needDu + 5 <= restDu)) {
+        // console.log('経過観察')
+        if (this.check(simulator.ac('経過観察'))) return this.result
+        restDu -= lostRestDu
+        continue
       }
       break
     }
+    // console.log(simulator.cp - needCp)
+    // console.log(restDu - needDu)
+    // console.log(simulator.durability)
+    // console.log(simulator.inner)
 
     if (simulator.cp < needCp) {
       console.log(simulator.history.join(', '))
     }
+    // if (simulator.durability + 5 * simulator.manipulation < restDu) {
+    //   console.log('ズレ発生')
+    //   console.log(simulator.durability + 5 * simulator.manipulation, restDu)
+    // }
+    let x = restDu
+    let z = simulator.durability
     // console.log(restDu, simulator.durability)
     // 仕上げフェーズ
     // イノベ, ?, ?, グレスラ, ビエルゴ
     // 仮: イノベ, 倹約, 倹約, グレスラ, ビエルゴ: CP124, 耐久20
     if (this.check(simulator.ac('イノベーション'))) return this.result
-    if (this.check(simulator.ac('倹約加工'))) return this.result
-    restDu -= 5
-    if (this.check(simulator.ac('倹約加工'))) return this.result
-    restDu -= 5
+    if (!simulator.hasCondition('良兆候')) {
+      if (this.check(simulator.ac('倹約加工'))) return this.result
+      restDu -= 5
+    }
+    if (!simulator.hasCondition('良兆候')) {
+      if (this.check(simulator.ac('倹約加工'))) return this.result
+      restDu -= 5
+    }
     // console.log(restDu, simulator.durability)
     if (this.check(simulator.ac('グレートストライド'))) return this.result
     if (this.check(simulator.ac('ビエルゴの祝福'))) return this.result
@@ -308,6 +350,10 @@ export default class MacroB extends MacroBase {
 
     // 完成フェーズ
     for (const action of finishActions) {
+      if (action === '倹約作業' && simulator.durability <= 5) {
+        console.log('耐久不足', simulator.durability, needDu, z, x)
+        console.log(simulator.history.join(', '))
+      }
       if (this.check(simulator.ac(action))) return this.result
     }
     // if (this.check(simulator.ac('加工'))) return this.result
