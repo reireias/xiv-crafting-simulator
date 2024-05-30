@@ -377,6 +377,30 @@ describe('ac', () => {
       expect(simulator.getDurability()).toBe(60)
     })
   })
+
+  describe('突貫作業', () => {
+    test('消費', () => {
+      const simulator = createSimulator()
+      simulator.ac('突貫作業')
+      expect(simulator.cp).toBe(DUMMY_STATUS.cp)
+      expect(simulator.durability).toBe(50)
+    })
+
+    test('確率で成功したり失敗したり', () => {
+      const p = []
+      const du = []
+      for (let i = 1; i < 100; i++) {
+        const simulator = createSimulator()
+        simulator.ac('突貫作業')
+        p.push(simulator.getProgress())
+        du.push(simulator.getDurability())
+      }
+      expect(Math.min(...p)).toBe(0)
+      expect(Math.max(...p)).toBe(1125)
+      expect(Math.min(...du)).toBe(50)
+      expect(Math.max(...du)).toBe(50)
+    })
+  })
 })
 
 describe('condition', () => {

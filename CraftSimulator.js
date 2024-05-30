@@ -48,6 +48,13 @@ const ACTIONS = {
     durability: 10,
     cp: 5,
   },
+  突貫作業: {
+    progressEfficiency: 500,
+    qualityEfficiency: 0,
+    durability: 10,
+    cp: 0,
+    probability: 0.5, // 成功確率
+  },
   加工: {
     progressEfficiency: 0,
     qualityEfficiency: 100,
@@ -356,7 +363,7 @@ export default class CraftSimulator {
       // 高進捗は1.5倍
       pe = Math.floor(pe * 1.5)
     }
-    this.progress += this._getProgressValue(pe)
+    this.progress += success ? this._getProgressValue(pe) : 0
     let qe = a.qualityEfficiency
     if (action === 'ビエルゴの祝福') {
       qe += this.inner * 20

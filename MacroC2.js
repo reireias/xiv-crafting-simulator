@@ -1,6 +1,7 @@
 import MacroBase from './MacroBase.js'
 export default class MacroC extends MacroBase {
   // 最終段階用マクロ
+  // マイスター用
   run(simulator) {
     this.simulator = simulator
     this.result = {
@@ -9,24 +10,24 @@ export default class MacroC extends MacroBase {
     }
     let action
 
-    // メモ(非マイスター)
+    // メモ(マイスター)
     // 工数 7040
     //
-    // 確信: 300 -> 678
-    // 下地作業: 360 -> 813
-    //   確信+ヴェネ+高進捗: 3050
-    //   確信+ヴェネ: 2032
-    //   ヴェネ+高進捗: 1830
-    //   ヴェネ: 1219
-    // 集中作業: 400 -> 904
-    //   ヴェネ: 1356
-    // 倹約作業 = 模範作業: 180 -> 406
-    //   ヴェネ+高進捗: 915
-    //   ヴェネ: 609
-    // 注視作業: 200 -> 452
-    //   ヴェネ: 678
-    // 作業: 120 -> 271
-    //   ヴェネ: 406
+    // 確信: 300 -> 681
+    // 下地作業: 360 -> 817
+    //   確信+ヴェネ+高進捗: 3062
+    //   確信+ヴェネ: 2042
+    //   ヴェネ+高進捗: 1837
+    //   ヴェネ: 1225
+    // 集中作業: 400 -> 908
+    //   ヴェネ: 1362
+    // 倹約作業 = 模範作業: 180 -> 408
+    //   ヴェネ+高進捗: 918
+    //   ヴェネ: 612
+    // 注視作業: 200 -> 454
+    //   ヴェネ: 681
+    // 作業: 120 -> 272
+    //   ヴェネ: 408
 
     // 初期
     if (this.check(simulator.ac('確信'))) return this.result
@@ -44,7 +45,7 @@ export default class MacroC extends MacroBase {
     if (this.check(simulator.ac(action))) return this.result
     // 3929 - 5558
     if (simulator.hasCondition('高進捗')) {
-      if (simulator.getProgress() + 1830 < 7040) {
+      if (simulator.getProgress() + 1837 < 7040) {
         if (this.check(simulator.ac('下地作業'))) return this.result
       } else {
         if (this.check(simulator.ac('模範作業'))) return this.result
@@ -57,41 +58,41 @@ export default class MacroC extends MacroBase {
     // 進捗: 5148 - 6914
     if (long || simulator.hasCondition('頑丈')) {
       if (simulator.hasCondition('高進捗')) {
-        // 下地作業 + ヴェネ + 高進捗 = 1830
-        if (simulator.getProgress() + 1830 < 7040) {
+        // 下地作業 + ヴェネ + 高進捗 = 1837
+        if (simulator.getProgress() + 1837 < 7040) {
           if (this.check(simulator.ac('下地作業'))) return this.result
-        } else if (simulator.getProgress() + 915 < 7040) {
+        } else if (simulator.getProgress() + 918 < 7040) {
           if (this.check(simulator.ac('模範作業'))) return this.result
         } else {
           // console.log('もったいないA', simulator.progress)
         }
       } else {
         // 下地作業 + ヴェネ = 1219
-        if (simulator.getProgress() + 1219 < 7040) {
+        if (simulator.getProgress() + 1225 < 7040) {
           if (this.check(simulator.ac('下地作業'))) return this.result
-        } else if (simulator.getProgress() + 915 < 7040) {
+        } else if (simulator.getProgress() + 612 < 7040) {
           if (this.check(simulator.ac('模範作業'))) return this.result
         } else {
           // console.log('もったいないB', simulator.progress)
         }
       }
     } else if (simulator.hasCondition('高品質')) {
-      // 集中作業 + ヴェネ = 1356
-      if (simulator.getProgress() + 1356 < 7040) {
+      // 集中作業 + ヴェネ = 1362
+      if (simulator.getProgress() + 1362 < 7040) {
         if (this.check(simulator.ac('集中作業'))) return this.result
-      } else if (simulator.getProgress() + 609 < 7040) {
+      } else if (simulator.getProgress() + 612 < 7040) {
         if (this.check(simulator.ac('模範作業'))) return this.result
       } else {
         // console.log('もったいないC', simulator.progress)
       }
     } else if (simulator.hasCondition('高進捗')) {
-      if (simulator.getProgress() + 915 < 7040) {
+      if (simulator.getProgress() + 612 < 7040) {
         if (this.check(simulator.ac('倹約作業'))) return this.result
       } else {
         // console.log('もったいないD', simulator.progress)
       }
     } else {
-      if (simulator.getProgress() + 609 < 7040) {
+      if (simulator.getProgress() + 408 < 7040) {
         if (this.check(simulator.ac('倹約作業'))) return this.result
       } else {
         // console.log('もったいないE', simulator.progress)
@@ -103,27 +104,27 @@ export default class MacroC extends MacroBase {
     let needCp
     let needDu
     let finishActions = []
-    if (restProgress <= 406) {
+    if (restProgress <= 408) {
       needCp = 7
       needDu = 1
       finishActions = ['模範作業']
-    } else if (restProgress <= 452) {
+    } else if (restProgress <= 454) {
       needCp = 12
       needDu = 1
       finishActions = ['経過観察', '注視作業']
-    } else if (restProgress <= 812) {
+    } else if (restProgress <= 408 + 408) {
       needCp = 25
       needDu = 6
       finishActions = ['倹約作業', '模範作業']
-    } else if (restProgress <= 858) {
+    } else if (restProgress <= 408 + 454) {
       needCp = 30
       needDu = 6
       finishActions = ['倹約作業', '経過観察', '注視作業']
-    } else if (restProgress <= 1218) {
+    } else if (restProgress <= 612 + 612) {
       needCp = 43
       needDu = 6
       finishActions = ['ヴェネレーション', '倹約作業', '模範作業']
-    } else if (restProgress <= 1287) {
+    } else if (restProgress <= 612 + 681) {
       needCp = 48
       needDu = 6
       finishActions = ['ヴェネレーション', '倹約作業', '経過観察', '注視作業']
