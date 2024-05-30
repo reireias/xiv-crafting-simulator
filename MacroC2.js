@@ -86,13 +86,13 @@ export default class MacroC extends MacroBase {
         // console.log('もったいないC', simulator.progress)
       }
     } else if (simulator.hasCondition('高進捗')) {
-      if (simulator.getProgress() + 612 < 7040) {
+      if (simulator.getProgress() + 918 < 7040) {
         if (this.check(simulator.ac('倹約作業'))) return this.result
       } else {
         // console.log('もったいないD', simulator.progress)
       }
     } else {
-      if (simulator.getProgress() + 408 < 7040) {
+      if (simulator.getProgress() + 612 < 7040) {
         if (this.check(simulator.ac('倹約作業'))) return this.result
       } else {
         // console.log('もったいないE', simulator.progress)

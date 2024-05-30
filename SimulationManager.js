@@ -9,6 +9,9 @@ export default class SimulationManager {
       const simulator = new CraftSimulator(recipe, status)
       const result = macro.run(simulator)
       // console.log(i, result.complete, simulator.getProgress(), simulator.getQuality(), simulator.getDurability())
+      // if (simulator.getQuality() === 0) {
+      //   console.log(i, simulator.lastAction)
+      // }
       results.push({
         complete: result.complete,
         progress: simulator.getProgress(),
