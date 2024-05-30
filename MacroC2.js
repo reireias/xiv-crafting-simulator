@@ -31,6 +31,12 @@ export default class MacroC extends MacroBase {
 
     // 初期
     if (this.check(simulator.ac('確信'))) return this.result
+    let manipulation
+    if (simulator.hasCondition('長持続')) {
+      manipulation = 10
+    } else {
+      manipulation = 8
+    }
     if (this.check(simulator.ac('マニピュレーション'))) return this.result
 
     // 工数上げフェーズ
@@ -45,41 +51,41 @@ export default class MacroC extends MacroBase {
       action = '倹約'
       wasteNot = 4
     }
-    if (this.check(simulator.ac(action))) return this.result
-    if (this.check(simulator.ac('ヴェネレーション'))) return this.result; wasteNot -= 1
+    if (this.check(simulator.ac(action))) return this.result; manipulation -= 1
+    if (this.check(simulator.ac('ヴェネレーション'))) return this.result; wasteNot -= 1; manipulation -= 1
     action = simulator.hasCondition('高品質') ? '集中作業' : '下地作業'
-    if (this.check(simulator.ac(action))) return this.result; wasteNot -= 1
+    if (this.check(simulator.ac(action))) return this.result; wasteNot -= 1; manipulation -= 1
     action = simulator.hasCondition('高品質') ? '集中作業' : '下地作業'
-    if (this.check(simulator.ac(action))) return this.result; wasteNot -= 1
+    if (this.check(simulator.ac(action))) return this.result; wasteNot -= 1; manipulation -= 1
     // 3929 - 5558
     if (simulator.hasCondition('高進捗')) {
       if (simulator.getProgress() + 1837 < 7040) {
-        if (this.check(simulator.ac('下地作業'))) return this.result; wasteNot -= 1
+        if (this.check(simulator.ac('下地作業'))) return this.result; wasteNot -= 1; manipulation -= 1
       } else {
-        if (this.check(simulator.ac('模範作業'))) return this.result; wasteNot -= 1
+        if (this.check(simulator.ac('模範作業'))) return this.result; wasteNot -= 1; manipulation -= 1
       }
     } else if (simulator.hasCondition('高品質')) {
-      if (this.check(simulator.ac('集中作業'))) return this.result; wasteNot -= 1
+      if (this.check(simulator.ac('集中作業'))) return this.result; wasteNot -= 1; manipulation -= 1
     } else {
-      if (this.check(simulator.ac('下地作業'))) return this.result; wasteNot -= 1
+      if (this.check(simulator.ac('下地作業'))) return this.result; wasteNot -= 1; manipulation -= 1
     }
     // 進捗: 5148 - 6914
     if (wasteNot > 0 || simulator.hasCondition('頑丈')) {
       if (simulator.hasCondition('高進捗')) {
         // 下地作業 + ヴェネ + 高進捗 = 1837
         if (simulator.getProgress() + 1837 < 7040) {
-          if (this.check(simulator.ac('下地作業'))) return this.result; wasteNot -= 1
+          if (this.check(simulator.ac('下地作業'))) return this.result; wasteNot -= 1; manipulation -= 1
         } else if (simulator.getProgress() + 918 < 7040) {
-          if (this.check(simulator.ac('模範作業'))) return this.result; wasteNot -= 1
+          if (this.check(simulator.ac('模範作業'))) return this.result; wasteNot -= 1; manipulation -= 1
         } else {
           // console.log('もったいないA', simulator.progress)
         }
       } else {
         // 下地作業 + ヴェネ = 1219
         if (simulator.getProgress() + 1225 < 7040) {
-          if (this.check(simulator.ac('下地作業'))) return this.result; wasteNot -= 1
+          if (this.check(simulator.ac('下地作業'))) return this.result; wasteNot -= 1; manipulation -= 1
         } else if (simulator.getProgress() + 612 < 7040) {
-          if (this.check(simulator.ac('模範作業'))) return this.result; wasteNot -= 1
+          if (this.check(simulator.ac('模範作業'))) return this.result; wasteNot -= 1; manipulation -= 1
         } else {
           // console.log('もったいないB', simulator.progress)
         }
@@ -87,21 +93,21 @@ export default class MacroC extends MacroBase {
     } else if (simulator.hasCondition('高品質')) {
       // 集中作業 + ヴェネ = 1362
       if (simulator.getProgress() + 1362 < 7040) {
-        if (this.check(simulator.ac('集中作業'))) return this.result; wasteNot -= 1
+        if (this.check(simulator.ac('集中作業'))) return this.result; wasteNot -= 1; manipulation -= 1
       } else if (simulator.getProgress() + 612 < 7040) {
-        if (this.check(simulator.ac('模範作業'))) return this.result; wasteNot -= 1
+        if (this.check(simulator.ac('模範作業'))) return this.result; wasteNot -= 1; manipulation -= 1
       } else {
         // console.log('もったいないC', simulator.progress)
       }
     } else if (simulator.hasCondition('高進捗')) {
       if (simulator.getProgress() + 918 < 7040) {
-        if (this.check(simulator.ac('倹約作業'))) return this.result; wasteNot -= 1
+        if (this.check(simulator.ac('倹約作業'))) return this.result; wasteNot -= 1; manipulation -= 1
       } else {
         // console.log('もったいないD', simulator.progress)
       }
     } else {
       if (simulator.getProgress() + 612 < 7040) {
-        if (this.check(simulator.ac('倹約作業'))) return this.result; wasteNot -= 1
+        if (this.check(simulator.ac('倹約作業'))) return this.result; wasteNot -= 1; manipulation -= 1
       } else {
         // console.log('もったいないE', simulator.progress)
       }
@@ -157,7 +163,7 @@ export default class MacroC extends MacroBase {
     // 途中からイノベかけつつ
     // その他 -> 倹約加工 ( or 匠の神業)
     // マニピュレーション切れ -> 再度マニピュレーション
-    let restDu = simulator.durability + 5 * simulator.manipulation
+    let restDu = simulator.durability + 5 * manipulation
     // 残っているバフを使い切る
     while (true) {
       if (simulator.inner >= 8) {
@@ -165,35 +171,35 @@ export default class MacroC extends MacroBase {
       }
       // TODO: 状態によっては早めに切り上げる？
       if (wasteNot < 1) {
-        if (simulator.hasCondition('高能率') && simulator.manipulation < 2) {
+        if (simulator.hasCondition('高能率') && manipulation < 2) {
           break
         }
-        if (simulator.hasCondition('長持続') && simulator.manipulation < 1) {
+        if (simulator.hasCondition('長持続') && manipulation < 1) {
           break
         }
       }
       if (wasteNot > 0) {
         if (simulator.hasCondition('高品質')) {
-          if (this.check(simulator.ac('集中加工'))) return this.result; wasteNot -= 1
+          if (this.check(simulator.ac('集中加工'))) return this.result; wasteNot -= 1; manipulation -= 1
           restDu -= 5
         } else {
-          if (this.check(simulator.ac('下地加工'))) return this.result; wasteNot -= 1
+          if (this.check(simulator.ac('下地加工'))) return this.result; wasteNot -= 1; manipulation -= 1
           restDu -= 10
         }
-      } else if (simulator.manipulation > 0) {
+      } else if (manipulation > 0) {
         if (simulator.hasCondition('高品質')) {
-          if (this.check(simulator.ac('集中加工'))) return this.result; wasteNot -= 1
+          if (this.check(simulator.ac('集中加工'))) return this.result; wasteNot -= 1; manipulation -= 1
           restDu -= 10
         } else if (simulator.hasCondition('頑丈')) {
           if (needCp + 40 <= simulator.cp && needDu + 10 <= restDu) {
-            if (this.check(simulator.ac('下地加工'))) return this.result; wasteNot -= 1
+            if (this.check(simulator.ac('下地加工'))) return this.result; wasteNot -= 1; manipulation -= 1
             restDu -= 10
           } else {
             break
           }
         } else {
           if (needCp + 25 <= simulator.cp && needDu + 5 <= restDu) {
-            if (this.check(simulator.ac('倹約加工'))) return this.result; wasteNot -= 1
+            if (this.check(simulator.ac('倹約加工'))) return this.result; wasteNot -= 1; manipulation -= 1
             restDu -= 5
           } else {
             break
@@ -207,8 +213,13 @@ export default class MacroC extends MacroBase {
     // 更新
     const maniCp = simulator.hasCondition('高能率') ? 48 : 96
     if (simulator.cp - maniCp >= needCp) {
+      if (simulator.hasCondition('長持続')) {
+        manipulation = 10
+      } else {
+        manipulation = 8
+      }
       if (this.check(simulator.ac('マニピュレーション'))) return this.result
-      restDu = simulator.durability + 5 * simulator.manipulation
+      restDu = simulator.durability + 5 * manipulation
     } else {
       console.log('来ないはず: マニをスキップ')
       console.log(simulator.history.join(', '))
@@ -220,7 +231,7 @@ export default class MacroC extends MacroBase {
     while (simulator.inner < 8) {
       if (simulator.hasCondition('高品質')) {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
-          if (this.check(simulator.ac('集中加工'))) return this.result
+          if (this.check(simulator.ac('集中加工'))) return this.result; manipulation -= 1
           restDu -= 10
           continue
         } else {
@@ -228,11 +239,11 @@ export default class MacroC extends MacroBase {
         }
       } else if (simulator.hasCondition('頑丈')) {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 40 <= simulator.cp) {
-          if (this.check(simulator.ac('下地加工'))) return this.result
+          if (this.check(simulator.ac('下地加工'))) return this.result; manipulation -= 1
           restDu -= 10
           continue
         } else if (needDu + 5 <= restDu && simulator.durability > 5 && needCp + 18 <= simulator.cp) {
-          if (this.check(simulator.ac('加工'))) return this.result
+          if (this.check(simulator.ac('加工'))) return this.result; manipulation -= 1
           restDu -= 5
           continue
         } else {
@@ -240,14 +251,14 @@ export default class MacroC extends MacroBase {
         }
       } else {
         if (needDu + 30 <= restDu && simulator.durability > 15 && needCp + 54 <= simulator.cp) {
-          if (this.check(simulator.ac('加工'))) return this.result
-          if (this.check(simulator.ac('中級加工'))) return this.result
+          if (this.check(simulator.ac('加工'))) return this.result; manipulation -= 1
+          if (this.check(simulator.ac('中級加工'))) return this.result; manipulation -= 1
           action = simulator.hasCondition('高品質') ? '集中加工' : '上級加工'
-          if (this.check(simulator.ac(action))) return this.result
+          if (this.check(simulator.ac(action))) return this.result; manipulation -= 1
           restDu -= 30
           continue
         } else if (needDu + 5 <= restDu && simulator.durability > 5 && needCp + 25 <= simulator.cp) {
-          if (this.check(simulator.ac('倹約加工'))) return this.result
+          if (this.check(simulator.ac('倹約加工'))) return this.result; manipulation -= 1
           restDu -= 5
           continue
         } else {
@@ -262,63 +273,63 @@ export default class MacroC extends MacroBase {
     // 余力で品質上げ
     while (true) {
       // 耐久消費をしないアクションを使った際に、マニピュレーションが無駄になる量
-      const lostRestDu = simulator.manipulation ? Math.max(simulator.durability + 5 - simulator.recipe.durability, 0) : 0
+      const lostRestDu = manipulation ? Math.max(simulator.durability + 5 - simulator.recipe.durability, 0) : 0
       if (simulator.hasCondition('高品質')) {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
-          if (this.check(simulator.ac('集中加工'))) return this.result
+          if (this.check(simulator.ac('集中加工'))) return this.result; manipulation -= 1
           restDu -= 10
           continue
         } else if (needDu + lostRestDu <= restDu) {
-          if (this.check(simulator.ac('秘訣'))) return this.result
+          if (this.check(simulator.ac('秘訣'))) return this.result; manipulation -= 1
           restDu -= lostRestDu
           continue
         }
       } else if (simulator.hasCondition('頑丈')) {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 40 <= simulator.cp) {
-          if (this.check(simulator.ac('下地加工'))) return this.result
+          if (this.check(simulator.ac('下地加工'))) return this.result; manipulation -= 1
           restDu -= 10
           continue
         } else if (needDu + 5 <= restDu && simulator.durability > 5 && needCp + 18 <= simulator.cp) {
-          if (this.check(simulator.ac('加工'))) return this.result
+          if (this.check(simulator.ac('加工'))) return this.result; manipulation -= 1
           restDu -= 5
           continue
         }
       } else if (simulator.hasCondition('良兆候')) {
         if (needDu + 10 + lostRestDu <= restDu && simulator.durability > 5 && needCp + 25 <= simulator.cp) {
-          if (this.check(simulator.ac('経過観察'))) return this.result
+          if (this.check(simulator.ac('経過観察'))) return this.result; manipulation -= 1
           restDu -= lostRestDu
-          if (this.check(simulator.ac('集中加工'))) return this.result
+          if (this.check(simulator.ac('集中加工'))) return this.result; manipulation -= 1
           restDu -= 10
           continue
         }
       }
 
       if (simulator.inner === 10 && needDu + lostRestDu <= restDu && needCp + 32 <= simulator.cp) {
-        if (this.check(simulator.ac('匠の神業'))) return this.result
+        if (this.check(simulator.ac('匠の神業'))) return this.result; manipulation -= 1
         restDu -= lostRestDu
         continue
       }
       if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
-        if (this.check(simulator.ac('加工'))) return this.result
+        if (this.check(simulator.ac('加工'))) return this.result; manipulation -= 1
         restDu -= 10
         continue
       }
       const masterCp = simulator.hasCondition('高能率') ? 44 : 88
-      if (needDu + lostRestDu <= restDu && needCp + masterCp <= simulator.cp && simulator.manipulation === 0) {
+      if (needDu + lostRestDu <= restDu && needCp + masterCp <= simulator.cp && manipulation <= 0) {
         const upDu = Math.min(simulator.recipe.durability - simulator.durability, 30)
-        if (this.check(simulator.ac('マスターズメンド'))) return this.result
+        if (this.check(simulator.ac('マスターズメンド'))) return this.result; manipulation -= 1
         restDu += upDu
         restDu -= lostRestDu
         continue
       }
       if (needDu + 10 <= restDu && simulator.durability > 10) {
-        if (this.check(simulator.ac('ヘイスティタッチ'))) return this.result
+        if (this.check(simulator.ac('ヘイスティタッチ'))) return this.result; manipulation -= 1
         restDu -= 10
         continue
       }
       if (needDu + lostRestDu <= restDu && needCp + 7 <= simulator.cp && (needCp + 7 + 44 <= simulator.cp || needDu + 5 <= restDu)) {
         // console.log('経過観察')
-        if (this.check(simulator.ac('経過観察'))) return this.result
+        if (this.check(simulator.ac('経過観察'))) return this.result; manipulation -= 1
         restDu -= lostRestDu
         continue
       }
