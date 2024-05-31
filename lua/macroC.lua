@@ -111,5 +111,81 @@ for i = 1, count do
         if (inner >= 8) then
             break
         end
+        -- いい状態なら早めに切り上げ
+        if (wasteNot < 1) then
+            if (HasCondition("高能率") and manipulation < 2) then
+                break
+            end
+            if (HasCondition("長持続") and manipulation < 1) then
+                break
+            end
+        end
+        if (wasteNot > 0) then
+            if (HasCondition("高品質")) then
+                yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1; wasteNot = wasteNot - 1
+                inner = inner + 1
+                restDu = restDu - 5
+            else
+                yield("/ac 下地加工 <wait.3>"); manipulation = manipulation - 1; wasteNot = wasteNot - 1
+                inner = inner + 2
+                restDu = restDu - 10
+            end
+        elseif (manipulation > 0) then
+            if (HasCondition("高品質")) then
+                yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1; wasteNot = wasteNot - 1
+                inner = inner + 1
+                restDu = restDu - 5
+            elseif (HasCondition("頑丈")) then
+                if (needCp + 40 <= GetCp() and needDu + 10 <= restDu) then
+                    yield("/ac 下地加工 <wait.3>"); manipulation = manipulation - 1; wasteNot = wasteNot - 1
+                    inner = inner + 2
+                    restDu = restDu - 10
+                else
+                    break
+                end
+            else
+                if (needCp + 25 <= GetCp() and needDu + 5 <= restDu) then
+                    yield("/ac 倹約加工 <wait.3>"); manipulation = manipulation - 1; wasteNot = wasteNot - 1
+                    inner = inner + 1
+                    restDu = restDu - 6
+                else
+                    break
+                end
+            end
+        else
+            break
+        end
+    end
+
+    -- 更新
+    maniCp = HasCondition("高能率") and 48 or 96
+    if (GetCp() - maniCp >= needCp) then
+        if (HasCondition("長持続")) then
+            manipulation = 10
+        else
+            manipulation = 8
+        end
+        yield("/ac マニピュレーション <wait.3>")
+        restDu = GetDurability() + 5 * manipulation
+    else
+        -- 到達しないはず
+        restDu = GetDurability()
+    end
+
+    -- 後半
+    while (inner < 8) do
+        if (HasCondition("高品質")) then
+            if (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 18 <= GetCp()) then
+                yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 10
+                innner = inner + 1
+                goto continue
+            end
+        elseif (HasCondition("頑丈")) then
+        else
+        end
+        -- 何も実行できない場合は抜ける
+        break
+        ::continue::
     end
 end

@@ -164,9 +164,10 @@ export default class MacroC extends MacroBase {
     // その他 -> 倹約加工 ( or 匠の神業)
     // マニピュレーション切れ -> 再度マニピュレーション
     let restDu = simulator.durability + 5 * manipulation
+    let inner = 0
     // 残っているバフを使い切る
     while (true) {
-      if (simulator.inner >= 8) {
+      if (inner >= 8) {
         break
       }
       // TODO: 状態によっては早めに切り上げる？
@@ -182,18 +183,22 @@ export default class MacroC extends MacroBase {
         if (simulator.hasCondition('高品質')) {
           if (this.check(simulator.ac('集中加工'))) return this.result; wasteNot -= 1; manipulation -= 1
           restDu -= 5
+          inner += 1
         } else {
           if (this.check(simulator.ac('下地加工'))) return this.result; wasteNot -= 1; manipulation -= 1
           restDu -= 10
+          inner += 2
         }
       } else if (manipulation > 0) {
         if (simulator.hasCondition('高品質')) {
           if (this.check(simulator.ac('集中加工'))) return this.result; wasteNot -= 1; manipulation -= 1
           restDu -= 10
+          inner += 1
         } else if (simulator.hasCondition('頑丈')) {
           if (needCp + 40 <= simulator.cp && needDu + 10 <= restDu) {
             if (this.check(simulator.ac('下地加工'))) return this.result; wasteNot -= 1; manipulation -= 1
             restDu -= 10
+            inner += 2
           } else {
             break
           }
@@ -201,6 +206,7 @@ export default class MacroC extends MacroBase {
           if (needCp + 25 <= simulator.cp && needDu + 5 <= restDu) {
             if (this.check(simulator.ac('倹約加工'))) return this.result; wasteNot -= 1; manipulation -= 1
             restDu -= 5
+            inner += 1
           } else {
             break
           }
@@ -228,11 +234,12 @@ export default class MacroC extends MacroBase {
 
     // 後半
     // インナー上げ
-    while (simulator.inner < 8) {
+    while (inner < 8) {
       if (simulator.hasCondition('高品質')) {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
           if (this.check(simulator.ac('集中加工'))) return this.result; manipulation -= 1
           restDu -= 10
+          inner += 1
           continue
         } else {
           // console.log('まずこない？A')
@@ -241,10 +248,12 @@ export default class MacroC extends MacroBase {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 40 <= simulator.cp) {
           if (this.check(simulator.ac('下地加工'))) return this.result; manipulation -= 1
           restDu -= 10
+          inner += 2
           continue
         } else if (needDu + 5 <= restDu && simulator.durability > 5 && needCp + 18 <= simulator.cp) {
           if (this.check(simulator.ac('加工'))) return this.result; manipulation -= 1
           restDu -= 5
+          inner += 1
           continue
         } else {
           // console.log('まずこない？B')
@@ -256,10 +265,12 @@ export default class MacroC extends MacroBase {
           action = simulator.hasCondition('高品質') ? '集中加工' : '上級加工'
           if (this.check(simulator.ac(action))) return this.result; manipulation -= 1
           restDu -= 30
+          inner += 3
           continue
         } else if (needDu + 5 <= restDu && simulator.durability > 5 && needCp + 25 <= simulator.cp) {
           if (this.check(simulator.ac('倹約加工'))) return this.result; manipulation -= 1
           restDu -= 5
+          inner += 1
           continue
         } else {
           // console.log('まずこない？C')
@@ -278,6 +289,7 @@ export default class MacroC extends MacroBase {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
           if (this.check(simulator.ac('集中加工'))) return this.result; manipulation -= 1
           restDu -= 10
+          inner += 1
           continue
         } else if (needDu + lostRestDu <= restDu) {
           if (this.check(simulator.ac('秘訣'))) return this.result; manipulation -= 1
@@ -288,10 +300,12 @@ export default class MacroC extends MacroBase {
         if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 40 <= simulator.cp) {
           if (this.check(simulator.ac('下地加工'))) return this.result; manipulation -= 1
           restDu -= 10
+          inner += 2
           continue
         } else if (needDu + 5 <= restDu && simulator.durability > 5 && needCp + 18 <= simulator.cp) {
           if (this.check(simulator.ac('加工'))) return this.result; manipulation -= 1
           restDu -= 5
+          inner += 1
           continue
         }
       } else if (simulator.hasCondition('良兆候')) {
@@ -300,11 +314,12 @@ export default class MacroC extends MacroBase {
           restDu -= lostRestDu
           if (this.check(simulator.ac('集中加工'))) return this.result; manipulation -= 1
           restDu -= 10
+          inner += 1
           continue
         }
       }
 
-      if (simulator.inner === 10 && needDu + lostRestDu <= restDu && needCp + 32 <= simulator.cp) {
+      if (inner >= 10 && needDu + lostRestDu <= restDu && needCp + 32 <= simulator.cp) {
         if (this.check(simulator.ac('匠の神業'))) return this.result; manipulation -= 1
         restDu -= lostRestDu
         continue
@@ -312,6 +327,7 @@ export default class MacroC extends MacroBase {
       if (needDu + 10 <= restDu && simulator.durability > 10 && needCp + 18 <= simulator.cp) {
         if (this.check(simulator.ac('加工'))) return this.result; manipulation -= 1
         restDu -= 10
+        inner += 1
         continue
       }
       const masterCp = simulator.hasCondition('高能率') ? 44 : 88
@@ -325,6 +341,7 @@ export default class MacroC extends MacroBase {
       if (needDu + 10 <= restDu && simulator.durability > 10) {
         if (this.check(simulator.ac('ヘイスティタッチ'))) return this.result; manipulation -= 1
         restDu -= 10
+        // innerを追加したいが、成功か失敗か判断つかないので追加しない
         continue
       }
       if (needDu + lostRestDu <= restDu && needCp + 7 <= simulator.cp && (needCp + 7 + 44 <= simulator.cp || needDu + 5 <= restDu)) {
