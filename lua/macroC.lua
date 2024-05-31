@@ -178,14 +178,124 @@ for i = 1, count do
             if (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 18 <= GetCp()) then
                 yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1
                 restDu = restDu - 10
-                innner = inner + 1
+                inner = inner + 1
                 goto continue
             end
         elseif (HasCondition("頑丈")) then
+            if (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 40 <= GetCp()) then
+                yield("/ac 下地加工 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 10
+                inner = inner + 2
+                goto continue
+            elseif (needDu + 5 <= restDu and GetDurability() > 5 and needCp + 18 <= GetCp()) then
+                yield("/ac 加工 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 5
+                inner = inner + 1
+                goto continue
+            end
         else
+            if (needDu + 30 <= restDu and GetDurability() > 15 and needCp + 54 <= GetCp()) then
+                yield("/ac 加工 <wait.3>"); manipulation = manipulation - 1
+                yield("/ac 中級加工 <wait.3>"); manipulation = manipulation - 1
+                action = HasCondition("高品質") and "集中加工" or "上級加工"
+                yield("/ac " .. action .. " <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 30
+                inner = inner + 3
+                goto continue
+            elseif (needDu + 5 <= restDu and GetDurability() > 5 and needCp + 25 <= GetCp()) then
+                yield("/ac 倹約加工 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 5
+                inner = inner + 1
+                goto continue
+            end
         end
         -- 何も実行できない場合は抜ける
         break
         ::continue::
+    end
+
+    -- 余力で品質上げ
+    while (true) do
+        -- 耐久消費をしないアクションを使った際に、マニピュレーションが無駄になる量
+        lostRestDu = manipulation > 0 and math.max(GetDurability() + 5 - GetMaxDurability(), 0) or 0
+        masterCp = HasCondition("高能率") and 44 or 88
+        if (HasCondition("高品質")) then
+            if (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 18 <= GetCp()) then
+                yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 10
+                inner = inner + 1
+                goto continue2
+            elseif (needDu + lostRestDu <= restDu) then
+                yield("/ac 秘訣 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - lostRestDu
+                goto continue2
+            end
+        elseif (HasCondition("頑丈")) then
+            if (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 40 <= GetCp()) then
+                yield("/ac 下地加工 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 10
+                inner = inner + 2
+                goto continue2
+            elseif (needDu + 5 <= restDu and GetDurability() > 5 and needCp + 18 <= GetCp()) then
+                yield("/ac 加工 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 5
+                inner = inner + 1
+                goto continue2
+            end
+        elseif (HasCondition("良兆候")) then
+            if (needDu + 10 + lostRestDu <= restDu and GetDurability() > 5 and needCp + 25 <= GetCp()) then
+                yield("/ac 経過観察 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - lostRestDu
+                yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1
+                restDu = restDu - 10
+                inner = inner + 1
+                goto continue2
+            end
+        elseif (inner >= 10 and needDu + lostRestDu <= restDu and needCp + 32 < GetCp()) then
+            yield("/ac 匠の神業 <wait.3>"); manipulation = manipulation - 1
+            restDu = restDu - lostRestDu
+            goto continue2
+        elseif (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 18 < GetCp()) then
+            yield("/ac 加工 <wait.3>"); manipulation = manipulation - 1
+            restDu = restDu - 10
+            inner = inner + 1
+            goto continue2
+        elseif (needDu + lostRestDu <= restDu and needCp + masterCp <= GetCp() and manipulation <= 0) then
+            upDu = math.min(GetMaxDurability() - GetDurability(), 30)
+            yield("/ac マスターズメンド <wait.3>"); manipulation = manipulation - 1
+            restDu = restDu + upDu
+            restDu = restDu - lostRestDu
+            goto continue2
+        elseif (needDu + 10 <= restDu and GetDurability() > 10) then
+            yield("/ac ヘイスティタッチ <wait.3>"); manipulation = manipulation - 1
+            restDu = restDu - 10
+            -- 成功失敗が不明なのでinnerを計算できない
+            goto continue2
+        elseif (needDu + lostRestDu <= restDu and needCp + 7 <= GetCp() and (needCp + 7 + 44 <= GetCp() or needDu + 5 <= restDu)) then
+            yield("/ac 経過観察 <wait.3>"); manipulation = manipulation - 1
+            restDu = restDu - lostRestDu
+            goto continue2
+        end
+        break
+        ::continue2::
+    end
+
+    -- 仕上げ
+    yield("/ac イノベーション <wait.3>")
+    if (HasCondition("良兆候")) then
+        yield("/ac 倹約加工 <wait.3>")
+        restDu = restDu - 5
+    end
+    if (HasCondition("良兆候")) then
+        yield("/ac 倹約加工 <wait.3>")
+        restDu = restDu - 5
+    end
+    yield("/ac グレートストライド <wait.3>")
+    yield("/ac ビエルゴの祝福 <wait.3>")
+    restDu = restDu - 10
+
+    -- 完成
+    for action in pairs(finishActions) do
+        yield("/ac " .. action .. " <wait.3>")
     end
 end
