@@ -106,6 +106,7 @@ for i = 1, count do
     needDu = needDu + 20
     needCp = needCp + 124
     -- 品質上げフェーズ
+    restDu = GetDurability() + 5 * math.max(manipulation, 0)
     inner = 0
     while (true) do
         if (inner >= 8) then
@@ -123,7 +124,7 @@ for i = 1, count do
         if (wasteNot > 0) then
             if (HasCondition("高品質")) then
                 yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1; wasteNot = wasteNot - 1
-                inner = inner + 1
+                inner = inner + 2
                 restDu = restDu - 5
             else
                 yield("/ac 下地加工 <wait.3>"); manipulation = manipulation - 1; wasteNot = wasteNot - 1
@@ -133,7 +134,7 @@ for i = 1, count do
         elseif (manipulation > 0) then
             if (HasCondition("高品質")) then
                 yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1; wasteNot = wasteNot - 1
-                inner = inner + 1
+                inner = inner + 2
                 restDu = restDu - 5
             elseif (HasCondition("頑丈")) then
                 if (needCp + 40 <= GetCp() and needDu + 10 <= restDu) then
@@ -166,7 +167,7 @@ for i = 1, count do
             manipulation = 8
         end
         yield("/ac マニピュレーション <wait.3>")
-        restDu = GetDurability() + 5 * manipulation
+        restDu = GetDurability() + 5 * math.max(manipulation, 0)
     else
         -- 到達しないはず
         restDu = GetDurability()
@@ -178,7 +179,7 @@ for i = 1, count do
             if (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 18 <= GetCp()) then
                 yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1
                 restDu = restDu - 10
-                inner = inner + 1
+                inner = inner + 2
                 goto continue
             end
         elseif (HasCondition("頑丈")) then
@@ -197,7 +198,12 @@ for i = 1, count do
             if (needDu + 30 <= restDu and GetDurability() > 15 and needCp + 54 <= GetCp()) then
                 yield("/ac 加工 <wait.3>"); manipulation = manipulation - 1
                 yield("/ac 中級加工 <wait.3>"); manipulation = manipulation - 1
-                action = HasCondition("高品質") and "集中加工" or "上級加工"
+                if (HasCondition("高品質")) then
+                    action = "集中加工"
+                    inner = inner + 1
+                else
+                    action = "上級加工"
+                end
                 yield("/ac " .. action .. " <wait.3>"); manipulation = manipulation - 1
                 restDu = restDu - 30
                 inner = inner + 3
@@ -223,7 +229,7 @@ for i = 1, count do
             if (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 18 <= GetCp()) then
                 yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1
                 restDu = restDu - 10
-                inner = inner + 1
+                inner = inner + 2
                 goto continue2
             elseif (needDu + lostRestDu <= restDu) then
                 yield("/ac 秘訣 <wait.3>"); manipulation = manipulation - 1
@@ -248,7 +254,7 @@ for i = 1, count do
                 restDu = restDu - lostRestDu
                 yield("/ac 集中加工 <wait.3>"); manipulation = manipulation - 1
                 restDu = restDu - 10
-                inner = inner + 1
+                inner = inner + 2
                 goto continue2
             end
         elseif (inner >= 10 and needDu + lostRestDu <= restDu and needCp + 32 < GetCp()) then
@@ -295,7 +301,7 @@ for i = 1, count do
     restDu = restDu - 10
 
     -- 完成
-    for action in pairs(finishActions) do
+    for i, action in pairs(finishActions) do
         yield("/ac " .. action .. " <wait.3>")
     end
 end
