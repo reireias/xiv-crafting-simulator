@@ -440,6 +440,51 @@ describe('condition', () => {
     })
   })
 
+  describe('最高品質', () => {
+    test('補正', () => {
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        ['excellent']
+      )
+      expect(simulator.getCondition()).toBe('最高品質')
+      simulator.ac('加工')
+      expect(simulator.getQuality()).toBe(260 * 4)
+    })
+
+    test('集中作業・集中加工', () => {
+      const conditions = ['normal', 'excellent', 'excellent']
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        conditions
+      )
+      simulator.ac('集中加工') // 実行されない
+      expect(simulator.getDurability()).toBe(60)
+      simulator.ac('集中作業') // 実行されない
+      expect(simulator.getDurability()).toBe(60)
+      simulator.ac('加工')
+      expect(simulator.getDurability()).toBe(50)
+      simulator.ac('集中加工')
+      expect(simulator.getDurability()).toBe(40)
+      simulator.ac('集中作業')
+      expect(simulator.getDurability()).toBe(30)
+    })
+  })
+
+  describe('低品質', () => {
+    test('補正', () => {
+      const simulator = new CraftSimulator(
+        DUMMY_RECIPE,
+        DUMMY_STATUS,
+        ['poor']
+      )
+      expect(simulator.getCondition()).toBe('低品質')
+      simulator.ac('加工')
+      expect(simulator.getQuality()).toBe(Math.floor(260 * 0.5))
+    })
+  })
+
   describe('効能率', () => {
     test('消費CP半減', () => {
       const conditions = ['normal', 'pliant']

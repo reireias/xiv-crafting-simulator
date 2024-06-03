@@ -208,6 +208,8 @@ const CONDITION_MAP = {
   'good omen': '良兆候',
   malleable: '高進捗',
   primed: '長持続',
+  excellent: '最高品質',
+  poor: '低品質',
 }
 
 export default class CraftSimulator {
@@ -245,7 +247,7 @@ export default class CraftSimulator {
         this.conditions = this._createSplendorous6Conditions()
       } else {
         // 通常レシピ
-        this.conditions = [] // TODO: 通常レシピの状態配列を生成する
+        this.conditions = this._createConditions()
       }
     }
     this.turnIndex = 0
@@ -314,6 +316,36 @@ export default class CraftSimulator {
     return conditions
   }
 
+  // 通常のレシピの状態配列を生成
+  // TODO: レシピの難易度次第で確率が変わるので対応する
+  _createConditions() {
+    // 通常: 73%, 高品質: 25%, 最高品質: 2%と仮定
+    // https://jp.finalfantasyxiv.com/lodestone/character/5586773/blog/1166096
+    const conditions = ['normal']
+    while (this.conditions.length < 100) {
+      let next
+      const r = Math.random()
+      if (r < 0.73) {
+        next = 'normal'
+      } else if (r < 0.73 + 0.25) {
+        next = 'good'
+      } else {
+        next = 'excellent'
+      }
+      conditions.push(next)
+      // 高品質の次は通常
+      if (next === 'good') {
+        conditions.push('normal')
+      }
+      // 最高品質の次は低品質、通常
+      if (next === 'excellent') {
+        conditions.push('poor')
+        conditions.push('normal')
+      }
+    }
+    return conditions
+  }
+
   ac(action) {
     const before = {
       progress: this.progress,
@@ -330,10 +362,11 @@ export default class CraftSimulator {
     if (!doAction) {
       console.log('CP不足: ' + action)
     }
-    // 集中作業・集中加工・秘訣は高品質時のみ利用可能
+    // 集中作業・集中加工・秘訣は高品質以上のみ利用可能
     if (
       ['集中作業', '集中加工', '秘訣'].includes(action) &&
-      !this.hasRawCondition('good')
+      !this.hasRawCondition('good') &&
+      !this.hasRawCondition('excellent')
     ) {
       doAction = false
     }
@@ -523,6 +556,10 @@ export default class CraftSimulator {
     let goodRatio = 1
     if (this.getRawCondition() === 'good') {
       goodRatio = 1.75
+    } else if (this.getRawCondition() === 'excellent') {
+      goodRatio = 4.0
+    } else if (this.getRawCondition() === 'poor') {
+      goodRatio = 0.5
     }
     // インナークワイエットは乗算
     return Math.floor(value * ratio * (1 + 0.1 * this.inner) * goodRatio)
