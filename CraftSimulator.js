@@ -250,6 +250,7 @@ export default class CraftSimulator {
     }
     this.turnIndex = 0
     this.history = []
+    this.logs = []
     this.debug = false
   }
 
@@ -315,6 +316,12 @@ export default class CraftSimulator {
   }
 
   ac(action) {
+    const before = {
+      progress: this.progress,
+      quality: this.quality,
+      durability: this.durability,
+      cp: this.cp,
+    }
     const a = ACTIONS[action]
     if (!a) {
       throw new Error(`${action} is not defined in ACTIONS.`)
@@ -443,6 +450,34 @@ export default class CraftSimulator {
     } else if (action === '長期倹約') {
       this.wasteNot = this.hasRawCondition('primed') ? 10 : 8
     }
+
+    // write log
+    const record = {
+      action,
+      rawCondition: this.getRawCondition(),
+      condition: this.getCondition(),
+      diff: {
+        progress: this.progress - before.progress,
+        quality: this.quality - before.quality,
+        durability: this.durability - before.durability,
+        cp: this.cp - before.cp,
+      },
+      progress: this.progress,
+      quality: this.quality,
+      durability: this.durability,
+      cp: this.cp,
+      success,
+      buff: {
+        manipulation: this.manipulation,
+        muscleMemory: this.muscleMemory,
+        veneration: this.veneration,
+        innovation: this.innovation,
+        greatStrides: this.greatStrides,
+        wasteNot: this.wasteNot,
+      }
+    }
+    this.logs.push(record)
+
     this.turnIndex += 1
 
     return {
