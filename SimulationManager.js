@@ -50,14 +50,36 @@ export default class SimulationManager {
   }
 
   // 1回のみ実行し、詳細情報を表示する
-  debug(recipe, status, macro) {
-    const simulator = new CraftSimulator(recipe, status)
-    simulator.debug = true
-    const result = macro.run(simulator)
-    console.log({
-      complete: result.complete,
-      progress: simulator.getProgress(),
-      quality: Math.floor(simulator.getQuality() / 10),
-    })
+  debug(recipe, status, macro, sample = undefined) {
+    // sampleが与えられた場合、sampleと一致する結果が得られるまで実行
+    // それ以外は1回だけ実行
+    for (let i = 0; i < 100000; i++) {
+      const simulator = new CraftSimulator(recipe, status)
+      macro.run(simulator)
+      if (sample === undefined) {
+        this._print(simulator)
+        break
+      } else if (sample.length > 0 && sample.length === simulator.logs.length) {
+        let matched = true
+        for (let j = 0; j < sample.length; j++) {
+          if (sample[j].action !== simulator.logs[j].action) {
+            matched = false
+            break
+          }
+        }
+        if (matched) {
+          this._print(simulator)
+          break
+        }
+      }
+    }
+  }
+
+  _print(simulator) {
+    console.log('状態,アクション,作業,品質,耐久値,残CP,作業差分,品質差分')
+    for (const log of simulator.logs) {
+      const row = [log.condition, log.action, log.progress, log.quality,log.durability,log.cp,log.diff.progress, log.diff.quality]
+      console.log(row.join(','))
+    }
   }
 }
