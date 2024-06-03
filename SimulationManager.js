@@ -48,4 +48,16 @@ export default class SimulationManager {
     const max = Math.max(...completes.map((r) => r.quality))
     console.log(`収集品価値 max: ${max}`)
   }
+
+  // 1回のみ実行し、詳細情報を表示する
+  debug(recipe, status, macro) {
+    const simulator = new CraftSimulator(recipe, status)
+    simulator.debug = true
+    const result = macro.run(simulator)
+    console.log({
+      complete: result.complete,
+      progress: simulator.getProgress(),
+      quality: Math.floor(simulator.getQuality() / 10),
+    })
+  }
 }

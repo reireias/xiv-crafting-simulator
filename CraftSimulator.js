@@ -250,6 +250,7 @@ export default class CraftSimulator {
     }
     this.turnIndex = 0
     this.history = []
+    this.debug = false
   }
 
   // 5段階目の状態配列を生成
