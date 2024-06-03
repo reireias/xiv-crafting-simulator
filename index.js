@@ -1,3 +1,4 @@
+// @ts-nocheck
 import SimulationManager from './SimulationManager.js'
 import MacroA from './MacroA.js'
 import MacroB from './MacroB.js'
@@ -6,109 +7,81 @@ import MacroC2 from './MacroC2.js'
 import MacroD from './MacroD.js'
 import MacroE from './MacroE.js'
 
-// モーエンツール5段階
-const SPLENDOROUS_5_RECIPE = {
-  durability: 60,
-  progress: 6600,
-  quality: 15368,
-  // TODO: 難易度をもたせる
-  expertType: 5, // モーエンツール5段階目
+const RECIPE = {
+  // モーエンツール
+  splendorous: {
+    // 5段階
+    stage5: {
+      durability: 60,
+      progress: 6600,
+      quality: 15368,
+      // TODO: 難易度をもたせる
+      expertType: 5, // モーエンツール5段階目
+    },
+    // 最終段階
+    stage6: {
+      durability: 60,
+      progress: 7040,
+      quality: 16308,
+      expertType: 6, // モーエンツール6段階目
+    },
+  },
 }
 
-const SPLENDOROUS_6_RECIPE = {
-  durability: 60,
-  progress: 7040,
-  quality: 16308,
-  expertType: 6, // モーエンツール6段階目
+const STATUS = {
+  // 4段階を装備 + チャイ
+  stage4: {
+    notMeister: {
+      craftmanship: 4027, // 作業精度
+      control: 4056, // 加工精度
+      cp: 672,
+    },
+    meister: {
+      craftmanship: 4047, // 作業精度
+      control: 4076, // 加工精度
+      cp: 687,
+    },
+  },
+  // 5段階を装備 + チャイ
+  stage5: {
+    notMeister: {
+      craftmanship: 4039, // 作業精度
+      control: 4064, // 加工精度
+      cp: 672,
+    },
+    // + 薬酒
+    notMeisterMed: {
+      craftmanship: 4039, // 作業精度
+      control: 4064, // 加工精度
+      cp: 672 + 21,
+    },
+    meister: {
+      craftmanship: 4059, // 作業精度
+      control: 4084, // 加工精度
+      cp: 687,
+    },
+  },
 }
-
-// 4段階を装備
-// 非マイスター(飯: チャイ)
-const NOT_MEISTER_STATUS4 = {
-  craftmanship: 4027, // 作業精度
-  control: 4056, // 加工精度
-  cp: 672,
-}
-
-// マイスター(飯: チャイ)
-const MEISTER_STATUS4 = {
-  craftmanship: 4047, // 作業精度
-  control: 4076, // 加工精度
-  cp: 687,
-}
-
-// 5段階を装備
-// 非マイスター(飯: チャイ)
-const NOT_MEISTER_STATUS5 = {
-  craftmanship: 4039, // 作業精度
-  control: 4064, // 加工精度
-  cp: 672,
-}
-// 非マイスター(飯: チャイ + 薬酒)
-const NOT_MEISTER_STATUS5_MED = {
-  craftmanship: 4039, // 作業精度
-  control: 4064, // 加工精度
-  cp: 672 + 21,
-}
-
-// マイスター(飯: チャイ)
-const MEISTER_STATUS5 = {
-  craftmanship: 4059, // 作業精度
-  control: 4084, // 加工精度
-  cp: 687,
-}
-
-const sample = [
-  '確信',
-  'マニピュレーション',
-  '倹約',
-  'ヴェネレーション',
-  '下地作業',
-  '下地作業',
-  '下地作業',
-  '倹約作業',
-  '倹約加工',
-  '倹約加工',
-  'マニピュレーション',
-  '加工',
-  '中級加工',
-  '上級加工',
-  '集中加工',
-  '下地加工',
-  'イノベーション',
-  'グレートストライド',
-  'ビエルゴの祝福',
-  'ヴェネレーション',
-  '倹約作業',
-  '経過観察',
-  '注視作業',
-]
 
 const manager = new SimulationManager()
-const macroA = new MacroA()
-const macroB = new MacroB()
-const macroC = new MacroC()
-const macroC2 = new MacroC2()
-const macroD = new MacroD()
-const macroE = new MacroE()
 
 let th
 // 1125~: 2
 // 1500~: 3
 th = [750, 1125, 1500]
-// manager.simulate(SPLENDOROUS_5_RECIPE, NOT_MEISTER_STATUS4, macroA, 50000, th)
-// manager.simulate(SPLENDOROUS_5_RECIPE, NOT_MEISTER_STATUS4, macroB, 50000, th)
-// manager.simulate(SPLENDOROUS_5_RECIPE, MEISTER_STATUS4, macroB, 50000, th)
+// manager.simulate(RECIPE.splendorous.stage5, STATUS.stage4.notMeister, new MacroA(), 50000, th)
+// manager.simulate(RECIPE.splendorous.stage5, STATUS.stage4.notMeister, new MacroB(), 50000, th)
+// manager.simulate(RECIPE.splendorous.stage5, STATUS.stage4.meister, new MacroB(), 50000, th)
 
 // 800~ : 1
 // 1200~: 2
 // 1600~: 3
 th = [800, 1200, 1600]
-// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroB, 50000, th)
-// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroC, 10000, th)
-// manager.simulate(SPLENDOROUS_6_RECIPE, MEISTER_STATUS5, macroC, 10000, th)
-manager.simulate(SPLENDOROUS_6_RECIPE, MEISTER_STATUS5, macroC2, 10000, th)
-// manager.debug(SPLENDOROUS_6_RECIPE, MEISTER_STATUS5, macroC2)
-// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5_MED, macroC, 10000, th)
-// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroD, 10000, th)
-// manager.simulate(SPLENDOROUS_6_RECIPE, NOT_MEISTER_STATUS5, macroE, 10000, th)
+// manager.simulate(RECIPE.splendorous.stage6, STATUS.stage5.notMeister, new MacroB(), 50000, th)
+// manager.simulate(RECIPE.splendorous.stage6, STATUS.stage5.notMeister, new MacroC(), 10000, th)
+// manager.simulate(RECIPE.splendorous.stage6, STATUS.stage5.meister, new MacroC(), 10000, th)
+manager.simulate(RECIPE.splendorous.stage6, STATUS.stage5.meister, new MacroC2(), 10000, th)
+// manager.debug(RECIPE.splendorous.stage6, STATUS.stage5.meister, new MacroC2())
+// manager.simulate(RECIPE.splendorous.stage6, STATUS.stage5.notMeister, new MacroC(), 10000, th)
+// manager.simulate(RECIPE.splendorous.stage6, STATUS.stage5.notMeister, new MacroD(), 10000, th)
+// manager.simulate(RECIPE.splendorous.stage6, STATUS.stage5.notMeister, new MacroE(), 10000, th)
