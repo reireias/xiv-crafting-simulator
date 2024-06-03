@@ -132,7 +132,7 @@ for i = 1, count do
     yield("/echo 品質上げフェーズ")
     restDu = GetDurability() + 5 * math.max(manipulation, 0)
     while (true) do
-        if (inner >= 10) then
+        if (inner >= 8) then
             break
         end
         -- いい状態なら早めに切り上げ
@@ -188,7 +188,7 @@ for i = 1, count do
 
     -- 後半
     yield("/echo 品質上げフェーズ 後半")
-    while (inner < 10) do
+    while (inner < 8) do
         if (HasCondition("高品質")) then
             if (needDu + 10 <= restDu and GetDurability() > 10 and needCp + 18 <= GetCp()) then
                 ac("集中加工")
