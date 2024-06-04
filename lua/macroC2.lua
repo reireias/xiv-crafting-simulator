@@ -6,7 +6,6 @@ manipulation = 0 -- マニピュレーションの残ターン数
 
 -- アクションを実行し、各種バフの数値を更新する
 function ac(action)
-    yield("/ac " .. action .. " <wait.3>")
 
     if (action == "倹約") then
         wasteNot = HasCondition("長持続") and 6 or 4
@@ -29,6 +28,8 @@ function ac(action)
     elseif (action == "ビエルゴの祝福") then
         inner = 0
     end
+
+    yield("/ac " .. action .. " <wait.3>")
 end
 
 for i = 1, count do
@@ -305,4 +306,5 @@ for i = 1, count do
     for i, action in pairs(finishActions) do
         ac(action)
     end
+    yield("/waitaddon RecipeNote")
 end
